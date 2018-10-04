@@ -1,42 +1,62 @@
 import bpy,IPython
 import math
 import pdb
+import os.path
+from bpy import context
+import mathutils
+from mathutils import Vector,Quaternion
+from math import radians, degrees
 
-
-def import_bvh(file_path):
-	try:		
+def Import_Bvh(file_path):
+	try:
+		if not os.path.exists(file_path):
+			IPython.embed()
+			print('File .BVH is not available.')
 		bpy.ops.import_anim.bvh(filepath=file_path, axis_forward='Y',axis_up='Z', rotate_mode='NATIVE')
 	except:
-		print("Couldn't open file: {}".format(file_path))
+		print("Couln't open file: {}".format(file_path))
 
-def export_bvh():
-	try:				
+def Export_Bvh(file_path):
+	try:
+		if os.path.exists(file_path):
+			os.remove(file_path)
+		scn = bpy.context.scene
+
 		bpy.context.scene.render.fps = 20  # We configure the frame rate		
-		bpy.ops.export_anim.bvh(filepath="/home/huan/Documents_Master/InterfaceV2/two_cmu_retargeted/bvh_modified/suyvan_03.bvh",frame_start=1, frame_end=250, rotate_mode='NATIVE', root_transform_only=True)	
+		bpy.ops.export_anim.bvh(filepath=file_path, global_scale = 1, frame_start= scn.frame_start, frame_end= scn.frame_end, rotate_mode='NATIVE', root_transform_only=True)	
 	except:
 		print("Couldn't export file")
 
-# get keyframes of object list
-def get_keyframes(obj_list):
-    keyframes = []
-    for obj in obj_list:
-        anim = obj.animation_data
-        if anim is not None and anim.action is not None:
-            for fcu in anim.action.fcurves:
-                for keyframe in fcu.keyframe_points:
-                    x, y = keyframe.co
-                    if x not in keyframes:
-                        keyframes.append((math.ceil(x)))
-    return keyframes
+def Get_Data_Key_Frame():
+	sce = bpy.context.scene
+	ob = bpy.context.object
 
-def Key_Frame_Points(): #Gets the key-frame values as an array.
-    KEYFRAME_POINTS_ARRAY = []
-    # selection = bpy.context.selected_objects
-    fcurves = bpy.context.active_object.animation_data.action.fcurves
-    for curve in fcurves:
-        IPython.embed()
-        keyframePoints = curve.keyframe_points
-        for keyframe in keyframePoints:
-            KEYFRAME_POINTS_ARRAY.append(round(keyframe.co[1],6))
-    print(KEYFRAME_POINTS_ARRAY)
-    return KEYFRAME_POINTS_ARRAY
+	for f in range(sce.frame_start, sce.frame_end+1):
+		sce.frame_set(f)
+		print("Frame %i" % f)
+		for pbone in ob.pose.bones:
+			IPython.embed()
+			print(pbone.name, pbone.location)
+
+def Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ):
+	sce = bpy.context.scene
+	ob = bpy.context.object
+	
+	for f in range(sce.frame_start, sce.frame_end+1):
+		sce.frame_set(f)
+		if f == FrameNumber:
+			keyFrame = context.scene.frame_current
+			keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
+			for pbone in ob.pose.bones:
+				if pbone.name == BoneName:
+					bpy.ops.object.mode_set(mode='POSE')
+					pbone.bone.select = True
+					IPython.embed()
+					pbone.rotation_euler.x = math.radians(ValueX)
+					pbone.rotation_euler.y = math.radians(ValueY)
+					pbone.rotation_euler.z = math.radians(ValueZ)					
+					bpy.context.scene.update()
+					#IPython.embed()
+					pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
+					context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
+					bpy.ops.object.mode_set(mode='OBJECT')
