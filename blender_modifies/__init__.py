@@ -10,7 +10,6 @@ from math import radians, degrees
 def Import_Bvh(file_path):
 	try:
 		if not os.path.exists(file_path):
-			IPython.embed()
 			print('File .BVH is not available.')
 		bpy.ops.import_anim.bvh(filepath=file_path, axis_forward='Y',axis_up='Z', rotate_mode='NATIVE')
 	except:
@@ -56,7 +55,6 @@ def Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ):
 					pbone.rotation_euler.y = math.radians(ValueY)
 					pbone.rotation_euler.z = math.radians(ValueZ)					
 					bpy.context.scene.update()
-					#IPython.embed()
 					pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
 					context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 					bpy.ops.object.mode_set(mode='OBJECT')
