@@ -5,19 +5,29 @@ import os.path
 import mathutils
 from mathutils import Vector,Quaternion
 from math import radians, degrees
+import numpy as np
+import matplotlib.pyplot as plt
 from .HMILib import HMI
-
 context = bpy.context
 
-def main_():
-	pass
-	#print(HMI.add(5,6));
+
+def K_means_clustering(K):
+	X = Get_Data_Rotation()
+	(centers, labels, it) = HMI.kmeans(X, K)
+	print('Centers found by our algorithm:')
+	print(centers[-1])
+	#HMI.Display_Data_Rotation(X)
+	print(labels)
+	HMI.Display_Data_Rotation(X)
+	HMI.kmeans_display(X, labels[-1])
+	#HMI.kmeans_display(X, original_label)
 
 def Import_Bvh(file_path):
 	try:
 		if not os.path.exists(file_path):
 			print('File .BVH is not available.')
 		bpy.ops.import_anim.bvh(filepath=file_path, axis_forward='Y',axis_up='Z', rotate_mode='NATIVE')
+		print("Importing is successful !!!")
 	except:
 		print("Couln't open file: {}".format(file_path))
 
@@ -38,10 +48,24 @@ def Get_Data_Key_Frame():
 		sce.frame_set(f)
 		print("Frame %i" % f)
 		for pbone in ob.pose.bones:
-			IPython.embed()
 			print(pbone.name, pbone.location)
 
-def Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ):
+def Get_Data_Rotation():
+	sce = bpy.context.scene
+	frame_start = 1
+	frame_end = 6180
+	ob = bpy.context.object
+	ROTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		for pbone in ob.pose.bones:			
+			rotation_bone = [pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z]			
+			ROTATION_KEY_DATA.append(rotation_bone)	
+	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
+	return ROTATION_KEY_DATA
+
+
+def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bool bdegrees =True):
 	sce = bpy.context.scene
 	ob = bpy.context.object
 
@@ -52,16 +76,19 @@ def Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ):
 			keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
 			print('key interp: {}'.format(keyInterp))
 			for pbone in ob.pose.bones:
-				if pbone.name == BoneName:
-					
+				if pbone.name == BoneName:					
 					lastMode = pbone.rotation_mode
 					pbone.rotation_mode = "XYZ"
 					bpy.ops.object.mode_set(mode='POSE')
-					pbone.bone.select = True					
-					pbone[pbone.name].rotation_euler.x = math.radians(ValueX)
-					pbone[pbone.name].rotation_euler.y = math.radians(ValueY)
-					pbone[pbone.name].rotation_euler.z = math.radians(ValueZ)	
-							
+					pbone.bone.select = True			
+					if bdegrees ==True:
+						pbone.rotation_euler.x = math.radians(ValueX)
+						pbone.rotation_euler.y = math.radians(ValueY)
+						pbone.rotation_euler.z = math.radians(ValueZ)
+					else:
+						pbone.rotation_euler.x = ValueX
+						pbone.rotation_euler.y = ValueY
+						pbone.rotation_euler.z = ValueZ							
 					bpy.context.scene.update()
 					pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
 					context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp

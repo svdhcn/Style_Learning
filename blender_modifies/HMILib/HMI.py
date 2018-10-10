@@ -1,13 +1,92 @@
 import re
 import numpy as np
 import sys
-
+import scipy
+import IPython
+from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from sklearn.cluster import KMeans
-from sklearn.metrics import pairwise_distances_argmin_min
+#from sklearn.cluster import KMeans
+#from sklearn.metrics import pairwise_distances_argmin_min
 from scipy.interpolate import BSpline
-from plot_figure import PlotFigure
+#from plot_figure import PlotFigure
+
+
+def randrange(n, vmin, vmax):
+    '''
+    Helper function to make an array of random numbers having shape (n, )
+    with each number distributed Uniform(vmin, vmax).
+    '''
+    return (vmax - vmin)*np.random.rand(n) + vmin
+
+def Plt_Data_Rotation():
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    n = 100
+    xs = randrange(n, 0, 50)
+    ys = randrange(n, 0, 100)
+    zs = randrange(n, 0, 200)
+    ax.scatter(xs, ys, zs, c='r', marker='o')
+    plt.show()
+
+def kmeans_display (X, label):
+    K = np.amax(label) + 1
+    X0 = X[label == 0, :]
+    X1 = X[label == 1, :]
+    X2 = X[label == 2, :]
+    plt.plot(X0[: ,0], X0[: ,1], 'b^', markersize = 4, alpha = .8)
+    plt.plot(X1[: ,0], X1[: ,1], 'go', markersize = 4, alpha = .8)
+    plt.plot(X2[: ,0], X2[: ,1], 'rs', markersize = 4, alpha = .8)
+    plt.axis('equal')
+    plt.plot()
+    plt.show()
+
+def Display_Data_Rotation (X):
+    plt.plot(X[:,0], X[:,1], 'b^', markersize = 4, alpha = .8)
+    plt.axis('equal')
+    plt.plot()
+    plt.show()
+
+def kmeans_init_centers(X, k):
+    # randomly pick k rows of X as initial centers
+    return X[np.random.choice(X.shape[0], k, replace=False)]
+
+def kmeans_assign_labels(X, centers):
+    # calculate pairwise distances btw data and centers
+    D = cdist(X, centers)
+    # return index of the closest center
+    return np.argmin(D, axis = 1)
+
+def kmeans_update_centers(X, labels, K):
+    centers = np.zeros((K, X.shape[1]))
+    for k in range(K):
+        # collect all points assigned to the k-th cluster
+        Xk = X[labels == k, :]
+        # take average
+        centers[k,:] = np.mean(Xk, axis = 0)
+    return centers
+
+def has_converged(centers, new_centers):
+    # return True if two sets of centers are the same
+    return (set([tuple(a) for a in centers]) == set([tuple(a) for a in new_centers]))        
+
+def kmeans(X, K):
+    centers = [kmeans_init_centers(X, K)]
+    labels = []
+    it = 0
+    while True:
+        labels.append(kmeans_assign_labels(X, centers[-1]))
+        new_centers = kmeans_update_centers(X, labels[-1], K)
+        if has_converged(centers[-1], new_centers):
+            break
+        centers.append(new_centers)
+        it += 1
+    return (centers, labels, it)
+
+
 
 def read_config(filename):
     f = open(filename, "r")
