@@ -19,7 +19,7 @@ def K_means_clustering(K):
 	#HMI.Display_Data_Rotation(X)
 	print(labels)
 	HMI.Display_Data_Rotation(X)
-	HMI.kmeans_display(X, labels[-1])
+	#HMI.kmeans_display(X, labels[-1])
 	#HMI.kmeans_display(X, original_label)
 
 def Import_Bvh(file_path):
@@ -65,7 +65,7 @@ def Get_Data_Rotation():
 	return ROTATION_KEY_DATA
 
 
-def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bool bdegrees =True):
+def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
 	ob = bpy.context.object
 
