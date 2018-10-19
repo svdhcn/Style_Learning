@@ -6,19 +6,7 @@ import mathutils
 from mathutils import Vector,Quaternion
 from math import radians, degrees
 import numpy as np
-import matplotlib.pyplot as plt
-from .HMILib import HMI
 context = bpy.context
-
-def K_means_clustering(K):
-	X = Get_Data_Rotation()
-	(centers, labels, it) = HMI.kmeans(X, K)
-	print('Centers found by our algorithm:')
-	print(centers[-1])
-	print('Number of loop is %f'%it)
-	#HMI.Display_Data_Rotation(X)	
-	HMI.kmeans_display(X, labels[-1])
-	#HMI.kmeans_display(X, original_label)
 
 def Import_Bvh(file_path):
 	try:
@@ -54,16 +42,13 @@ def Get_Data_Rotation():
 	frame_end = 6181
 	ob = bpy.context.object
 	ROTATION_KEY_DATA = []
-	text_file = open("Output.txt", "w")
 	for f in range(frame_start, frame_end):
 		sce.frame_set(f)
 		rotation_bone = []		
 		for pbone in ob.pose.bones:
 			if pbone.name != "RightShoulder":
 				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])
-		text_file.write(rotation_bone.str())
 		ROTATION_KEY_DATA.append(rotation_bone)
-	text_file.close()
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
 

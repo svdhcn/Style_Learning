@@ -6,10 +6,10 @@ import IPython
 from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-#from sklearn.cluster import KMeans
-#from sklearn.metrics import pairwise_distances_argmin_min
+from sklearn.cluster import KMeans
+from sklearn.metrics import pairwise_distances_argmin_min
 from scipy.interpolate import BSpline
-#from plot_figure import PlotFigure
+from plot_figure import PlotFigure
 
 def Plt_Data_Rotation():
     fig = plt.figure()

@@ -1,1 +1,1 @@
-blender -b -P ./blender_modifies/test.py
+blender -b -P ./blender_modifies/runBlender.py
