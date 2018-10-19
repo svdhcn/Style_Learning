@@ -7,6 +7,7 @@ from mathutils import Vector,Quaternion
 from math import radians, degrees
 import numpy as np
 context = bpy.context
+import json
 
 def Import_Bvh(file_path):
 	try:
@@ -22,7 +23,8 @@ def Export_Bvh(file_path):
 		if os.path.exists(file_path):
 			os.remove(file_path)		
 		bpy.context.scene.render.fps = 20  # We configure the frame rate		
-		bpy.ops.export_anim.bvh(filepath=file_path, global_scale = 1, frame_start= 1, frame_end= 50, rotate_mode='NATIVE', root_transform_only=True)	
+		bpy.ops.export_anim.bvh(filepath=file_path, global_scale = 1, frame_start= 1, frame_end= 50, rotate_mode='NATIVE', root_transform_only=True)
+		print("Exporting is successful !!!")
 	except:
 		print("Couldn't export file")
 
@@ -30,7 +32,7 @@ def Get_Data_Key_Frame():
 	sce = bpy.context.scene
 	ob = bpy.context.object
 
-	for f in range(sce.frame_start, sce.frame_end+1):
+	for f in range(sce.frame_start, sce.frame_end + 1):
 		sce.frame_set(f)
 		print("Frame %i" % f)
 		for pbone in ob.pose.bones:
@@ -42,16 +44,21 @@ def Get_Data_Rotation():
 	frame_end = 6181
 	ob = bpy.context.object
 	ROTATION_KEY_DATA = []
+	file = open("DataRotation.txt", "w+")
 	for f in range(frame_start, frame_end):
 		sce.frame_set(f)
-		rotation_bone = []		
+		rotation_bone = []
 		for pbone in ob.pose.bones:
 			if pbone.name != "RightShoulder":
 				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])
+				file.write(str(pbone.rotation_euler.x)+ " ")
+				file.write(str(pbone.rotation_euler.y)+ " ")
+				file.write(str(pbone.rotation_euler.z)+ " ")
+		file.write("\n")
 		ROTATION_KEY_DATA.append(rotation_bone)
+	file.close()
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
-
 
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
