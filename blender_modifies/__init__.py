@@ -7,7 +7,11 @@ from mathutils import Vector,Quaternion
 from math import radians, degrees
 import numpy as np
 context = bpy.context
-import json
+from scipy.cluster.vq import vq, kmeans, whiten
+import matplotlib.pyplot as plt
+from scipy import linalg as la
+from fbpca import pca
+from fbpca import diffsnorm
 
 def Import_Bvh(file_path):
 	try:
@@ -31,7 +35,6 @@ def Export_Bvh(file_path):
 def Get_Data_Key_Frame():
 	sce = bpy.context.scene
 	ob = bpy.context.object
-
 	for f in range(sce.frame_start, sce.frame_end + 1):
 		sce.frame_set(f)
 		print("Frame %i" % f)
@@ -44,22 +47,42 @@ def Get_Data_Rotation():
 	frame_end = 6181
 	ob = bpy.context.object
 	ROTATION_KEY_DATA = []
-	file = open("DataRotation.txt", "w+")
 	for f in range(frame_start, frame_end):
 		sce.frame_set(f)
 		rotation_bone = []
 		for pbone in ob.pose.bones:
 			if pbone.name != "RightShoulder":
-				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])
-				file.write(str(pbone.rotation_euler.x)+ " ")
-				file.write(str(pbone.rotation_euler.y)+ " ")
-				file.write(str(pbone.rotation_euler.z)+ " ")
-		file.write("\n")
+				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])				
 		ROTATION_KEY_DATA.append(rotation_bone)
-	file.close()
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
 
+def kmeans_clustering(K):
+	data = pca_rotation(3)
+	centroids,_ = kmeans(data, K)
+	idx,_ = vq(data,centroids)
+	plt.plot(data[idx==0,0],data[idx==0,1],'ob',
+	 data[idx==1,0],data[idx==1,1],'or',
+	 data[idx==2,0],data[idx==2,1],'og') # third cluster points
+	plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
+	plt.show()
+
+def pca_rotation(pca_components):
+	data = Get_Data_Rotation()
+	Display_Data_Rotation(data)
+	repeat = 20
+	for i in range(repeat):
+		(U, s, Va) = pca(data, pca_components, True)
+	err = diffsnorm(data, U, s, Va)
+	print('facebook pca time: error: %E' % (err))
+	IPython.embed()
+	return U
+
+def Display_Data_Rotation (X):
+    plt.plot(X[:,0], X[:,1], 'b^', markersize = 4, alpha = .8)
+    plt.axis('equal')
+    plt.plot()
+    plt.show()
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
 	ob = bpy.context.object
