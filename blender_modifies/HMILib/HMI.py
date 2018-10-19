@@ -11,14 +11,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import BSpline
 #from plot_figure import PlotFigure
 
-
-def randrange(n, vmin, vmax):
-    '''
-    Helper function to make an array of random numbers having shape (n, )
-    with each number distributed Uniform(vmin, vmax).
-    '''
-    return (vmax - vmin)*np.random.rand(n) + vmin
-
 def Plt_Data_Rotation():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -37,9 +29,24 @@ def kmeans_display (X, label):
     X0 = X[label == 0, :]
     X1 = X[label == 1, :]
     X2 = X[label == 2, :]
-    plt.plot(X0[: ,0], X0[: ,1], 'b^', markersize = 4, alpha = .8)
+    X3 = X[label == 3, :]
+    X4 = X[label == 4, :]
+    X5 = X[label == 5, :]
+    X6 = X[label == 6, :]
+    X7 = X[label == 7, :]
+    X8 = X[label == 8, :]
+    X9 = X[label == 9, :]
+    plt.plot(X0[: ,0], X0[: ,1], 'bo', markersize = 4, alpha = .8)
     plt.plot(X1[: ,0], X1[: ,1], 'go', markersize = 4, alpha = .8)
-    plt.plot(X2[: ,0], X2[: ,1], 'rs', markersize = 4, alpha = .8)
+    plt.plot(X2[: ,0], X2[: ,1], 'ro', markersize = 4, alpha = .8)
+    plt.plot(X3[: ,0], X3[: ,1], 'co', markersize = 4, alpha = .8)
+    plt.plot(X4[: ,0], X4[: ,1], 'yo', markersize = 4, alpha = .8)
+    plt.plot(X5[: ,0], X5[: ,1], 'mo', markersize = 4, alpha = .8)
+    plt.plot(X6[: ,0], X6[: ,1], 'ko', markersize = 4, alpha = .8)
+    plt.plot(X7[: ,0], X7[: ,1], 'wo', markersize = 4, alpha = .8)
+    plt.plot(X8[: ,0], X8[: ,1], 'c*', markersize = 4, alpha = .8)
+    plt.plot(X9[: ,0], X9[: ,1], 'y*', markersize = 4, alpha = .8)
+   
     plt.axis('equal')
     plt.plot()
     plt.show()
