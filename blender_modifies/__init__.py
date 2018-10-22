@@ -58,31 +58,30 @@ def Get_Data_Rotation():
 	return ROTATION_KEY_DATA
 
 def kmeans_clustering(K):
-	data = pca_rotation(3)
-	centroids,_ = kmeans(data, K)
-	idx,_ = vq(data,centroids)
-	plt.plot(data[idx==0,0],data[idx==0,1],'ob',
-	 data[idx==1,0],data[idx==1,1],'or',
-	 data[idx==2,0],data[idx==2,1],'og') # third cluster points
-	plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
-	plt.show()
+	data = pca_rotation(2)
+	#Display_Data_Rotation(data)
+	repeat = 1
+	for i in range(repeat):
+		centroids,_ = kmeans(data, K)
+		idx,_ = vq(data,centroids)
+		plt.scatter(data[:, 0], data[:, 1], c=idx, s=50, cmap='viridis');
+		plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
+		plt.show()
 
 def pca_rotation(pca_components):
 	data = Get_Data_Rotation()
-	Display_Data_Rotation(data)
-	repeat = 20
-	for i in range(repeat):
-		(U, s, Va) = pca(data, pca_components, True)
+	(U, s, Va) = pca(data, pca_components, True)
+	print("U", U.shape, "s", s.shape, "Va", Va.shape)
 	err = diffsnorm(data, U, s, Va)
 	print('facebook pca time: error: %E' % (err))
-	IPython.embed()
-	return U
+	return np.dot(U,np.diag(s))
 
 def Display_Data_Rotation (X):
-    plt.plot(X[:,0], X[:,1], 'b^', markersize = 4, alpha = .8)
-    plt.axis('equal')
-    plt.plot()
-    plt.show()
+	plt.plot(X[:,0], X[:,1], 'b^', markersize = 4, alpha = .8)
+	plt.axis('equal')
+	plt.plot()
+	plt.show()
+
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
 	ob = bpy.context.object
