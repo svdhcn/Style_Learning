@@ -57,7 +57,7 @@ def Get_Data_Rotation():
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
 
-def kmeans_clustering(K):
+def kmeans_clustering_preview(K):
 	data = pca_rotation(2)
 	#Display_Data_Rotation(data)
 	repeat = 1
@@ -67,6 +67,28 @@ def kmeans_clustering(K):
 		plt.scatter(data[:, 0], data[:, 1], c=idx, s=50, cmap='viridis');
 		plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
 		plt.show()
+
+def kmeans_clustering(K):
+	data = Get_Data_Rotation()
+	repeat = 1
+	for i in range(repeat):
+		centroids,_ = kmeans(data, K)
+		idx,_ = vq(data,centroids)
+		#print("centroids:", centroids)
+		#plt.scatter(data[:, 0], data[:, 1], c=idx, s=50, cmap='viridis');
+		#plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
+		#plt.show()
+	IPython.embed()
+	sce = bpy.context.scene
+	frame_start = 1
+	frame_end = 6181
+	ob = bpy.context.object
+	ROTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		for idx in len(centroids):
+			Edit_Rotation_Bone("RightElbow", f, centroids[i][0], centroids[i][1], centroids[i][2])
+			Edit_Rotation_Bone("RightWrist", f, centroids[i][3], centroids[i][4], centroids[i][5])
 
 def pca_rotation(pca_components):
 	data = Get_Data_Rotation()
@@ -92,7 +114,7 @@ def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees 
 			keyFrame = context.scene.frame_current
 			keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
 			for pbone in ob.pose.bones:
-				if pbone.name == BoneName:					
+				if pbone.name == BoneName:
 					lastMode = pbone.rotation_mode
 					pbone.rotation_mode = "XYZ"
 					bpy.ops.object.mode_set(mode='POSE')
@@ -104,7 +126,7 @@ def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees 
 					else:
 						pbone.rotation_euler.x = ValueX
 						pbone.rotation_euler.y = ValueY
-						pbone.rotation_euler.z = ValueZ							
+						pbone.rotation_euler.z = ValueZ	
 					bpy.context.scene.update()
 					pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
 					context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
