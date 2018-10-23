@@ -71,10 +71,18 @@ def kmeans_clustering_preview(K):
 def kmeans_clustering():
 	K = 30
 	data = Get_Data_Rotation()
-	repeat = 1
-	# for i in range(repeat):
-	centroids,_ = kmeans(data, K)
-	labels,_ = vq(data,centroids)
+	repeat = 30
+	mindiff = 0
+	Centroids
+	# begin repeat n times with k means
+	for i in range(repeat):
+		centroids,diff = kmeans(data, K)
+		if mindiff > diff:
+			mindiff = diff
+			Centroids = centroids
+			print (mindiff)
+	#  end repeat
+	labels,_ = vq(data,Centroids)
 	data = [[]]
 	for label in labels:
 		data.append(centroids[label])
