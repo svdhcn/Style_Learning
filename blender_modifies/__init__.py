@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from scipy import linalg as la
 from fbpca import pca
 from fbpca import diffsnorm
+from scipy.interpolate import BSpline
 
 def Import_Bvh(file_path):
 	try:
@@ -71,14 +72,29 @@ def kmeans_clustering_preview(K):
 def kmeans_clustering():
 	K = 30
 	data = Get_Data_Rotation()
-	repeat = 1
-	# for i in range(repeat):
-	centroids,_ = kmeans(data, K)
-	labels,_ = vq(data,centroids)
+	repeat = 30
+	mindiff = 0.0
+	labels = []
+	# begin repeat n times with k means
+	for i in range(repeat):
+		centroids,diff = kmeans(data, K)
+		if i == 0:
+			mindiff = diff
+			Centroids = centroids
+			print (mindiff)
+			labels,_ = vq(data,Centroids)
+		else:
+			if mindiff > diff:
+				mindiff = diff
+				Centroids = centroids
+				print ("mindiff ",mindiff)
+				labels,_ = vq(data,Centroids)
+	#  end repeat
 	data = [[]]
 	for label in labels:
-		data.append(centroids[label])
+		data.append(Centroids[label])
 	data.remove([])
+	Bsline_rotation_data(labels, data)
 	return data
 
 	#anch = [[]]
@@ -92,6 +108,30 @@ def kmeans_clustering():
 	#plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
 	#plt.show()
 	
+def Bsline_rotation_data(labels, data):
+	knots_array = [[]]
+	z = []
+	k = 2
+	for i in range(0, int(len(labels)/20)):
+		z.append(i*20)
+		knots_array.append(data[labels[i*20]])
+	knots_array.remove([])
+	knots_array = np.array(knots_array)
+	print ("knots_array: ", knots_array)
+	x1 = knots_array[:, 0]
+	x2 = knots_array[:, 1]
+	x3 = knots_array[:, 2]
+	x4 = knots_array[:, 3]
+	x5 = knots_array[:, 4]
+	x6 = knots_array[:, 5]
+	spl_1 = BSpline(z, x1, k)
+	spl_2 = BSpline(z, x2, k)
+	spl_3 = BSpline(z, x3, k)
+	spl_4 = BSpline(z, x4, k)
+	spl_5 = BSpline(z, x5, k)
+	spl_6 = BSpline(z, x6, k)
+	IPython.embed()
+
 def Edit_data():
 	data = kmeans_clustering()
 	data = np.array(data)
