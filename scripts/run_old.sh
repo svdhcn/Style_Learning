@@ -1,1 +1,0 @@
-blender -b -P ./blender_modifies/runBlender.py
