@@ -17,6 +17,8 @@ from fbpca import diffsnorm
 import GPy
 from scipy.interpolate import BSpline
 
+""""""""""""""""""""""""""""" Import and Export BVH file """""""""""""""""""""""""""""
+
 def Import_Bvh(file_path):
 	try:
 		if not os.path.exists(file_path):
@@ -36,51 +38,8 @@ def Export_Bvh(file_path):
 	except:
 		print("Couldn't export file")
 
-def Get_Data_Key_Frame():
-	sce = bpy.context.scene
-	ob = bpy.context.object
-	for f in range(sce.frame_start, sce.frame_end + 1):
-		sce.frame_set(f)
-		print("Frame %i" % f)
-		for pbone in ob.pose.bones:
-			print(pbone.name, pbone.location)
 
-def Get_Data_Rotation():
-	sce = bpy.context.scene
-	frame_start = 1
-	frame_end = 6180
-	ob = bpy.context.object
-	ROTATION_KEY_DATA = []
-	for f in range(frame_start, frame_end):
-		sce.frame_set(f)
-		rotation_bone = []
-		for pbone in ob.pose.bones:
-			if pbone.name != "RightShoulder":
-				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])				
-		ROTATION_KEY_DATA.append(rotation_bone)
-	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
-	return ROTATION_KEY_DATA
-
-def Get_Data_Location():
-	Edit_Data_Rotation()
-	sce = bpy.context.scene
-	frame_start = 1
-	frame_end = 6180
-	ob = bpy.context.object
-	LOTATION_KEY_DATA = []
-	for f in range(frame_start, frame_end):
-		sce.frame_set(f)
-		location_bone = []
-		for pbone in ob.pose.bones:
-			if pbone.name != "RightShoulder":
-				location_bone.extend(pbone.head)			
-		LOTATION_KEY_DATA.append(location_bone)
-	LOTATION_KEY_DATA = np.array(LOTATION_KEY_DATA)
-	return LOTATION_KEY_DATA
-
-def Change_Lotation_Data():
-	_LocationData = Get_Data_Location()
-	return Bspline_Data(_LocationData)
+""""""""""""""""""""""""""""" Machine Learning """""""""""""""""""""""""""""""""""""""
 
 def Kmeans_Clustering_Preview(K):
 	data = pca_rotation(2)
@@ -150,6 +109,8 @@ def Kmeans_Clustering():
 	#plt.show()
 
 def Bspline_Rotation_Data(labels, data):
+	#This funtion do smooth rotation data
+
 	knots_array = [[]]
 	z = []
 	k = 2
@@ -178,7 +139,9 @@ def Bspline_Rotation_Data(labels, data):
 	_Smooth_data = np.array(_Smooth_data)
 	return _Smooth_data
 
-def Bspline_Data(data):
+def Bspline_Location_Data(data):
+	# This funtion do smooth lotation data 
+
 	data = np.array(data)
 	knots_array = [[]]
 	z = []
@@ -206,9 +169,8 @@ def Bspline_Data(data):
 	for i in range(0, len(data)):
 		_Smooth_data.append([spl_1(i), spl_2(i), spl_3(i), spl_4(i), spl_5(i), spl_6(i)])
 	_Smooth_data = np.array(_Smooth_data)
-	return _Smooth_data
-	
-	"""
+	return _Smooth_data	
+	""" this is plot data after smoothly
 	spl_1_ind.append(i)
 	fig, ax = plt.subplots()
 	ax.plot(spl_1_ind, spl_1_data, 'b-', lw=4, alpha=0.7, label='BSpline')
@@ -216,8 +178,61 @@ def Bspline_Data(data):
 	ax.legend(loc='best')
 	plt.show()
 	"""
+def Pca_Rotation(pca_components):
+	# This function to loss dimention data
+
+	data = Get_Data_Rotation()
+	Display_Data_Rotation(data)
+	(U, s, Va) = pca(data, pca_components, True)
+	print("U", U.shape, "s", s.shape, "Va", Va.shape)
+	err = diffsnorm(data, U, s, Va)
+	print('facebook pca time: error: %E' % (err))
+	return np.dot(U,np.diag(s))
+
+
+
+""""""""""""""""""""""""""""" Execute Data """""""""""""""""""""""""""""
+
+def Get_Data_Rotation():
+	# This function to get all data rotation of bones
+
+	sce = bpy.context.scene
+	frame_start = 1
+	frame_end = 6180
+	ob = bpy.context.object
+	ROTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		rotation_bone = []
+		for pbone in ob.pose.bones:
+			if pbone.name != "RightShoulder":
+				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])				
+		ROTATION_KEY_DATA.append(rotation_bone)
+	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
+	return ROTATION_KEY_DATA
+
+def Get_Data_Location():
+	#This function to get all data lotation of bones
+
+	Edit_Data_Rotation()
+	sce = bpy.context.scene
+	frame_start = 1
+	frame_end = 6180
+	ob = bpy.context.object
+	LOTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		location_bone = []
+		for pbone in ob.pose.bones:
+			if pbone.name != "RightShoulder":
+				location_bone.extend(pbone.head)			
+		LOTATION_KEY_DATA.append(location_bone)
+	LOTATION_KEY_DATA = np.array(LOTATION_KEY_DATA)
+	return LOTATION_KEY_DATA
 
 def Edit_Data_Rotation():
+	# This funtion to change rotation data of bone
+	
 	data = Kmeans_Clustering()
 	frame_start = 1
 	frame_end = 6180
@@ -249,6 +264,8 @@ def Edit_Data_Rotation():
 	print("Edit rotation done")
 
 def Edit_Data_Lotation():
+	# This funtion to change lotation data of bone
+
 	data = Change_Lotation_Data()
 	frame_start = 1
 	frame_end = 6180
@@ -303,15 +320,6 @@ def Isolate_Ingredient_Data():
 				pbone.rotation_mode = lastMode				
 	print ("Done !!!")
 
-def Pca_Rotation(pca_components):
-	data = Get_Data_Rotation()
-	Display_Data_Rotation(data)
-	(U, s, Va) = pca(data, pca_components, True)
-	print("U", U.shape, "s", s.shape, "Va", Va.shape)
-	err = diffsnorm(data, U, s, Va)
-	print('facebook pca time: error: %E' % (err))
-	return np.dot(U,np.diag(s))
-
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
 	ob = bpy.context.object
@@ -340,3 +348,9 @@ def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees 
 					context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 					bpy.ops.object.mode_set(mode='OBJECT')
 					pbone.rotation_mode = lastMode
+
+def Change_Lotation_Data():
+	_LocationData = Get_Data_Location()
+	return Bspline_Data(_LocationData)
+
+""""""""""""""""""""""""""""""" To be continued !!! """"""""""""""""""""""""""""""""""
