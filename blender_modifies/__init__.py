@@ -61,7 +61,28 @@ def Get_Data_Rotation():
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
 
-def kmeans_clustering_preview(K):
+def Get_Data_Location():
+	Edit_Data_Rotation()
+	sce = bpy.context.scene
+	frame_start = 1
+	frame_end = 6180
+	ob = bpy.context.object
+	LOTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		location_bone = []
+		for pbone in ob.pose.bones:
+			if pbone.name != "RightShoulder":
+				location_bone.extend(pbone.head)			
+		LOTATION_KEY_DATA.append(location_bone)
+	LOTATION_KEY_DATA = np.array(LOTATION_KEY_DATA)
+	return LOTATION_KEY_DATA
+
+def Change_Lotation_Data():
+	_LocationData = Get_Data_Location()
+	return Bspline_Data(_LocationData)
+
+def Kmeans_Clustering_Preview(K):
 	data = pca_rotation(2)
 	Display_Data_Rotation(data)
 	repeat = 20
@@ -89,7 +110,7 @@ def kmeans_clustering_preview(K):
 	plt.plot(Centroids[:,0],Centroids[:,1],'sm',markersize=8)
 	plt.show()
 
-def kmeans_clustering():
+def Kmeans_Clustering():
 	K = 50
 	data = Get_Data_Rotation()
 	repeat = 10
@@ -103,18 +124,19 @@ def kmeans_clustering():
 			mindiff = diff
 			Centroids = centroids
 			labels,_ = vq(data,Centroids)
-		else:
-			if mindiff > diff:
-				mindiff = diff
-				Centroids = centroids
-				labels,_ = vq(data,Centroids)
+		elif mindiff > diff:
+			mindiff = diff
+			print("min diff", mindiff)
+			Centroids = centroids
+			labels,_ = vq(data,Centroids)
 	#  end repeat
 	data = [[]]
 	for label in labels:
 		data.append(Centroids[label])
 	data.remove([])
-	Bspline_rotation_data(labels, data)
-	return data
+	data = np.array(data)
+	_SmoothData = Bspline_Rotation_Data(labels, data)	
+	return _SmoothData
 
 	#anch = [[]]
 	#for i in range(0, len(data)):
@@ -126,14 +148,14 @@ def kmeans_clustering():
 	#plt.scatter(data[:, 0], data[:, 1], c=idx, s=50, cmap='viridis');
 	#plt.plot(centroids[:,0],centroids[:,1],'sm',markersize=8)
 	#plt.show()
-	
-def Bspline_rotation_data(labels, data):
+
+def Bspline_Rotation_Data(labels, data):
 	knots_array = [[]]
 	z = []
 	k = 2
-	for i in range(0, int(len(labels)/10)):
-		z.append(i*10)
-		knots_array.append(data[labels[i*10]])
+	for i in range(0, int(len(labels)/30)):
+		z.append(i*30)
+		knots_array.append(data[labels[i*30]])
 	knots_array.remove([])
 	knots_array = np.array(knots_array)
 	print ("knots_array: ", knots_array)
@@ -149,17 +171,60 @@ def Bspline_rotation_data(labels, data):
 	spl_4 = BSpline(z, x4, k)
 	spl_5 = BSpline(z, x5, k)
 	spl_6 = BSpline(z, x6, k)
-	IPython.embed()
+	_Smooth_data = []
+	spl_1_ind = []
+	for i in range(0, len(data)):
+		_Smooth_data.append([spl_1(i), spl_2(i), spl_3(i), spl_4(i), spl_5(i), spl_6(i)])
+	_Smooth_data = np.array(_Smooth_data)
+	return _Smooth_data
 
-def Edit_data():
-	data = kmeans_clustering()
+def Bspline_Data(data):
 	data = np.array(data)
+	knots_array = [[]]
+	z = []
+	k = 2
+	for i in range(0, int(len(data)/30)):
+		z.append(i*30)
+		knots_array.append(data[i*30])
+	knots_array.remove([])
+	knots_array = np.array(knots_array)
+	print ("knots_array: ", knots_array)
+	x1 = knots_array[:, 0]
+	x2 = knots_array[:, 1]
+	x3 = knots_array[:, 2]
+	x4 = knots_array[:, 3]
+	x5 = knots_array[:, 4]
+	x6 = knots_array[:, 5]
+	spl_1 = BSpline(z, x1, k)
+	spl_2 = BSpline(z, x2, k)
+	spl_3 = BSpline(z, x3, k)
+	spl_4 = BSpline(z, x4, k)
+	spl_5 = BSpline(z, x5, k)
+	spl_6 = BSpline(z, x6, k)
+	_Smooth_data = []
+	spl_1_ind = []
+	for i in range(0, len(data)):
+		_Smooth_data.append([spl_1(i), spl_2(i), spl_3(i), spl_4(i), spl_5(i), spl_6(i)])
+	_Smooth_data = np.array(_Smooth_data)
+	return _Smooth_data
+	
+	"""
+	spl_1_ind.append(i)
+	fig, ax = plt.subplots()
+	ax.plot(spl_1_ind, spl_1_data, 'b-', lw=4, alpha=0.7, label='BSpline')
+	ax.grid(True)
+	ax.legend(loc='best')
+	plt.show()
+	"""
+
+def Edit_Data_Rotation():
+	data = Kmeans_Clustering()
 	frame_start = 1
 	frame_end = 6180
 	sce = bpy.context.scene
 	ob = bpy.context.object
 	keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
-	context.user_preferences.edit.keyframe_new_interpolation_type = "NATIVE"
+	context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
 	bpy.ops.object.mode_set(mode='POSE')
 	for f in range(frame_start, frame_end):
 		sce.frame_set(f)
@@ -168,7 +233,7 @@ def Edit_data():
 			lastMode = pbone.rotation_mode
 			pbone.rotation_mode = "XYZ"			
 			pbone.bone.select = True
-			if pbone.name == "RightElbow":					
+			if pbone.name != "RightElbow":		
 				pbone.rotation_euler.x = data[f - 1][0]
 				pbone.rotation_euler.y = data[f - 1][1]
 				pbone.rotation_euler.z = data[f - 1][2]	
@@ -181,9 +246,38 @@ def Edit_data():
 			pbone.rotation_mode = lastMode
 	context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 	bpy.ops.object.mode_set(mode='OBJECT')
-	print("Edit done")
+	print("Edit rotation done")
 
-def isolate_ingredient_data():
+def Edit_Data_Lotation():
+	data = Change_Lotation_Data()
+	frame_start = 1
+	frame_end = 6180
+	sce = bpy.context.scene
+	ob = bpy.context.object
+	keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
+	context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
+	bpy.ops.object.mode_set(mode='EDIT')
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		keyFrame = context.scene.frame_current		
+		for pbone in ob.pose.bones:			
+			if pbone.name == "RightElbow":
+				bone = ob.data.edit_bones[pbone.name]
+				bone.head.x = data[f - 1][0]
+				bone.head.y = data[f - 1][1]
+				bone.head.z = data[f - 1][2]	
+			elif pbone.name == "RightWrist":
+				bone = ob.data.edit_bones[pbone.name]
+				bone.head.x = data[f - 1][3]
+				bone.head.y = data[f - 1][4]
+				bone.head.z = data[f - 1][5]
+			bpy.context.scene.update()
+			pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
+	context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
+	bpy.ops.object.mode_set(mode='OBJECT')
+	print("Edit location done")
+
+def Isolate_Ingredient_Data():
 	sce = bpy.context.scene
 	ob = bpy.context.object
 	frame_start = 1
@@ -206,10 +300,10 @@ def isolate_ingredient_data():
 				pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
 				context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 				bpy.ops.object.mode_set(mode='OBJECT')
-				pbone.rotation_mode = lastMode
+				pbone.rotation_mode = lastMode				
 	print ("Done !!!")
 
-def pca_rotation(pca_components):
+def Pca_Rotation(pca_components):
 	data = Get_Data_Rotation()
 	Display_Data_Rotation(data)
 	(U, s, Va) = pca(data, pca_components, True)
@@ -217,12 +311,6 @@ def pca_rotation(pca_components):
 	err = diffsnorm(data, U, s, Va)
 	print('facebook pca time: error: %E' % (err))
 	return np.dot(U,np.diag(s))
-
-def Display_Data_Rotation (X):
-	plt.plot(X[:,0], X[:,1], 'b^', markersize = 4, alpha = .8)
-	plt.axis('equal')
-	plt.plot()
-	plt.show()
 
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
