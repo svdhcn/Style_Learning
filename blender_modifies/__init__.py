@@ -21,7 +21,54 @@ from os import listdir
 from os.path import isfile, join
 
 from bvh import Bvh
+ # lib use to HMM
+import imp
+from hmmlearn import hmm
 
+def Test_HMM():
+	startprob = np.array([0.6, 0.3, 0.1, 0.0])
+	# The transition matrix, note that there are no transitions possible
+	# between component 1 and 3
+	transmat = np.array([[0.7, 0.2, 0.0, 0.1],
+	                     [0.3, 0.5, 0.2, 0.0],
+	                     [0.0, 0.3, 0.5, 0.2],
+	                     [0.2, 0.0, 0.2, 0.6]])
+	# The means of each component
+	means = np.array([[0.0,  0.0],
+	                  [0.0, 11.0],
+	                  [9.0, 10.0],
+	                  [11.0, -1.0]])
+	# The covariance of each component
+	covars = .5 * np.tile(np.identity(2), (4, 1, 1))
+
+	# Build an HMM instance and set parameters
+	model = hmm.GaussianHMM(n_components=4, covariance_type="full")
+
+	# Instead of fitting it from the data, we directly set the estimated
+	# parameters, the means and covariance of the components
+	model.startprob_ = startprob
+	model.transmat_ = transmat
+	model.means_ = means
+	model.covars_ = covars
+
+	# Generate samples
+	X, Z = model.sample(500)
+
+	# Plot the sampled data
+	plt.plot(X[:, 0], X[:, 1], ".-", label="observations", ms=6,
+	         mfc="orange", alpha=0.7)
+
+	# Indicate the component numbers
+	for i, m in enumerate(means):
+	    plt.text(m[0], m[1], 'Component %i' % (i + 1),
+	             size=17, horizontalalignment='center',
+	             bbox=dict(alpha=.7, facecolor='w'))
+	plt.legend(loc='best')
+	plt.show()
+
+data_rotation_body = []
+data_rotation_foots = []
+data_location_hips = []
 basic_motion = []
 frame_start = 1
 frame_end = 1
@@ -93,7 +140,7 @@ def Kmeans_Clustering_Preview(K):
 	plt.show()
 
 def Kmeans_Clustering():
-	K = 50
+	K = 100
 	data = Get_Data_Rotation()
 	repeat = 5
 	mindiff = 0.0
@@ -245,6 +292,13 @@ def Get_Data_Rotation():
 		ROTATION_KEY_DATA.append(rotation_bone)
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
+def Get_data_rotation_Body():
+	global data_rotation_body
+	data_rotation_body = Get_Data_Rotation()
+
+def Get_data_rotation_Foots():
+	global data_rotation_foots
+	data_rotation_foots = Get_Data_Rotation()
 
 def Get_Basic_Motion():
 	global basic_motion
@@ -252,12 +306,13 @@ def Get_Basic_Motion():
 
 def Edit_Data_Rotation_Foots():
 	# This funtion to change rotation Foots data of bone
-	print(basestring.shape)
-	data = Kmeans_Clustering()	
+	#data = Kmeans_Clustering()	
+	print('Shape data rotation foots is:', data_rotation_foots.shape)
 	sce = bpy.context.scene
 	ob = bpy.context.object	
 	bpy.ops.object.mode_set(mode='POSE')
-	for f in range(frame_start, frame_end):
+	frame_end_change = data_rotation_foots.shape[0]
+	for f in range(frame_start, frame_end_change):
 		frameSet = f - 1
 		sce.frame_set(f)
 		keyFrame = context.scene.frame_current
@@ -267,13 +322,26 @@ def Edit_Data_Rotation_Foots():
 			lastMode = pbone.rotation_mode
 			pbone.rotation_mode = "XYZ"
 			pbone.bone.select = True
-			if pbone.name == "RightShoulder":
-				pbone.rotation_euler = data[frameSet][0:3]
-			elif pbone.name == "RightElbow":
-				pbone.rotation_euler = data[frameSet][3:6]
-			elif pbone.name == "RightWrist":
-				pbone.rotation_euler = data[frameSet][6:9]
-			
+			if pbone.name not in List_Bones_Foots:
+				continue
+			if pbone.name == 'Hips':
+				continue		
+			if pbone.name == "RightHip":
+				pbone.rotation_euler = data_rotation_foots[frameSet][3:6]
+			elif pbone.name == "RightKnee":
+				pbone.rotation_euler = data_rotation_foots[frameSet][6:9]
+			elif pbone.name == "RightAnkle":
+				pbone.rotation_euler = data_rotation_foots[frameSet][9:12]
+			elif pbone.name == "RightToe":
+				pbone.rotation_euler = data_rotation_foots[frameSet][12:15]
+			elif pbone.name == "LeftHip":
+				pbone.rotation_euler = data_rotation_foots[frameSet][15:18]
+			elif pbone.name == "LeftKnee":
+				pbone.rotation_euler = data_rotation_foots[frameSet][18:21]
+			elif pbone.name == "LeftAnkle":
+				pbone.rotation_euler = data_rotation_foots[frameSet][21:24]
+			elif pbone.name == "LeftToe":
+				pbone.rotation_euler = data_rotation_foots[frameSet][24:27]
 			bpy.context.scene.update()
 			pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
 			pbone.rotation_mode = lastMode
@@ -284,59 +352,104 @@ def Edit_Data_Rotation_Foots():
 
 def Edit_Data_Rotation_Body():
 	# This funtion to change rotation data of bone
+	print('Shape data rotation foots is:', data_rotation_body.shape)
 	sce = bpy.context.scene
 	ob = bpy.context.object	
 	bpy.ops.object.mode_set(mode='POSE')
-	lt = 0
-	for f in range(frame_start, frame_end):	
-		frameSet = f + 1
+	frame_end_change = data_rotation_body.shape[0]
+	for f in range(frame_start, frame_end_change):
+		frameSet = f - 1
+		sce.frame_set(f)
 		sce.frame_set(frameSet)
 		keyFrame = context.scene.frame_current
 		keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
 		context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
-		nbone = 0
 		for pbone in ob.pose.bones:
-			IPython.embed()
 			lastMode = pbone.rotation_mode
-			pbone.rotation_mode = "XYZ"			
+			pbone.rotation_mode = "XYZ"
 			pbone.bone.select = True
+			if pbone.name not in List_Bones_Body:
+				continue
 			if pbone.name == 'Hips':
-				pbone.rotation_euler = basic_motion[frameSet][0: 3]
+				continue
 			elif pbone.name == 'Chest':
-				pbone.rotation_euler = basic_motion[frameSet][3: 6]
+				pbone.rotation_euler = data_rotation_body[frameSet][3: 6]
 			elif pbone.name == 'Chest2':
-				pbone.rotation_euler = basic_motion[frameSet][6: 9]
+				pbone.rotation_euler = data_rotation_body[frameSet][6: 9]
 			elif pbone.name =='Chest3':
-				pbone.rotation_euler = basic_motion[frameSet][9: 12]
+				pbone.rotation_euler = data_rotation_body[frameSet][9: 12]
 			elif pbone.name == 'Chest4':
-				pbone.rotation_euler = basic_motion[frameSet][12: 15]
+				pbone.rotation_euler = data_rotation_body[frameSet][12: 15]
 			elif pbone.name == 'Neck':
-				pbone.rotation_euler = basic_motion[frameSet][15: 18]
+				pbone.rotation_euler = data_rotation_body[frameSet][15: 18]
 			elif pbone.name == 'Head':
-				pbone.rotation_euler = basic_motion[frameSet][18: 21]
+				pbone.rotation_euler = data_rotation_body[frameSet][18: 21]
 			elif pbone.name == 'RightCollar':
-				pbone.rotation_euler = basic_motion[frameSet][21: 24]
+				pbone.rotation_euler = data_rotation_body[frameSet][21: 24]
 			elif pbone.name == 'RightShoulder':
-				pbone.rotation_euler = basic_motion[frameSet][24: 27]
+				pbone.rotation_euler = data_rotation_body[frameSet][24: 27]
 			elif pbone.name == 'RightElbow':
-				pbone.rotation_euler = basic_motion[frameSet][27: 30]
+				pbone.rotation_euler = data_rotation_body[frameSet][27: 30]
 			elif pbone.name == 'RightWrist':
-				pbone.rotation_euler = basic_motion[frameSet][30: 33]
+				pbone.rotation_euler = data_rotation_body[frameSet][30: 33]
 			elif pbone.name == 'LeftCollar':
-				pbone.rotation_euler = basic_motion[frameSet][33: 36]
+				pbone.rotation_euler = data_rotation_body[frameSet][33: 36]
 			elif pbone.name == 'LeftShoulder':
-				pbone.rotation_euler = basic_motion[frameSet][36: 39]
+				pbone.rotation_euler = data_rotation_body[frameSet][36: 39]
 			elif pbone.name == 'LeftElbow':
-				pbone.rotation_euler = basic_motion[frameSet][39: 42]
+				pbone.rotation_euler = data_rotation_body[frameSet][39: 42]
 			elif pbone.name == 'LeftWrist':
-				pbone.rotation_euler = basic_motion[frameSet][42: 45]
-		bpy.context.scene.update()
-		pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
-		pbone.rotation_mode = lastMode
-		context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
+				pbone.rotation_euler = data_rotation_body[frameSet][42: 45]
+			bpy.context.scene.update()
+			pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
+			pbone.rotation_mode = lastMode
+			context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 		
 	bpy.ops.object.mode_set(mode='OBJECT')
 	print("Edit rotation done")
+
+def Get_Data_Hip_Location():
+	#This function to get all data lotation of bones
+	
+	sce = bpy.context.scene
+	ob = bpy.context.object
+	LOCATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		location_bone = []
+		for pbone in ob.pose.bones:
+			if pbone.name == "Hips":
+				location_bone.extend(pbone.head)			
+		LOCATION_KEY_DATA.append(location_bone)
+	LOCATION_KEY_DATA = np.array(LOCATION_KEY_DATA)
+	return LOCATION_KEY_DATA
+
+def Get_data_lotation_Hips():
+	global data_location_hips
+	data_location_hips = Get_Data_Hip_Location()
+
+def Edit_Data_Hips_Lotation():
+	# This funtion to change lotation data of bone
+	print('Shape data lotation Hips is:', data_location_hips.shape)
+	sce = bpy.context.scene
+	ob = bpy.context.object
+	keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
+	context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
+	bpy.ops.object.mode_set(mode='EDIT')
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		keyFrame = context.scene.frame_current		
+		for pbone in ob.pose.bones:			
+			if pbone.name == "Hips":
+				bone = ob.data.edit_bones[pbone.name]
+				bone.head.x = data_location_hips[f - 1][0]
+				bone.head.y = data_location_hips[f - 1][1]
+				bone.head.z = data_location_hips[f - 1][2]				
+			bpy.context.scene.update()
+			pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
+			context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
+	bpy.ops.object.mode_set(mode='OBJECT')
+	print("Edit location done")
 
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene

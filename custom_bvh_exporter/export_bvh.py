@@ -91,7 +91,7 @@ def write_armature(context,
 			file.write("%sROOT %s\n" % (indent_str, bone_name))
 
 		file.write("%s{\n" % indent_str)
-		file.write("%s\tOFFSET %.6f %.6f %.6f\n" % (indent_str, loc.x * global_scale, loc.y * global_scale, loc.z * global_scale))
+		file.write("%s\tOFFSET %.6lf %.6lf %.6lf\n" % (indent_str, loc.x * global_scale, loc.y * global_scale, loc.z * global_scale))
 		if (bone.use_connect or root_transform_only) and bone.parent:
 			file.write("%s\tCHANNELS 3 %srotation %srotation %srotation\n" % (indent_str, rot_order_str[0], rot_order_str[1], rot_order_str[2]))
 		else:
@@ -111,7 +111,7 @@ def write_armature(context,
 			file.write("%s\tEnd Site\n" % indent_str)
 			file.write("%s\t{\n" % indent_str)
 			loc = bone.tail_local - node_locations[bone_name]
-			file.write("%s\t\tOFFSET %.6f %.6f %.6f\n" % (indent_str, loc.x * global_scale, loc.y * global_scale, loc.z * global_scale))
+			file.write("%s\t\tOFFSET %.6lf %.6lf %.6lf\n" % (indent_str, loc.x * global_scale, loc.y * global_scale, loc.z * global_scale))
 			file.write("%s\t}\n" % indent_str)
 
 		file.write("%s}\n" % indent_str)
@@ -232,7 +232,7 @@ def write_armature(context,
 
 	file.write("MOTION\n")
 	file.write("Frames: %d\n" % (frame_end - frame_start + 1))
-	file.write("Frame Time: %.6f\n" % (1.0 / (20 / scene.render.fps_base)))
+	file.write("Frame Time: %.6f\n" % (1.0 / (60 / scene.render.fps_base)))
 
 	for frame in range(frame_start, frame_end + 1):
 		scene.frame_set(frame)
