@@ -17,9 +17,16 @@ from fbpca import diffsnorm
 import GPy
 from scipy.interpolate import BSpline
 
-frame_start = 1
-frame_end = 6180
+from os import listdir
+from os.path import isfile, join
 
+from bvh import Bvh
+
+basic_motion = []
+frame_start = 1
+frame_end = 1
+List_Bones_Body = ['Hips', 'Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
+List_Bones_Foots = ['Hips', 'RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 """"""""""""""""""""""""""""" Import and Export BVH file """""""""""""""""""""""""""""
 
 def Import_Bvh(file_path):
@@ -27,6 +34,10 @@ def Import_Bvh(file_path):
 		if not os.path.exists(file_path):
 			print('File .BVH is not available.')
 		bpy.ops.import_anim.bvh(filepath=file_path, axis_forward='Y',axis_up='Z', rotate_mode='NATIVE')
+		with open(file_path) as f:
+			global frame_end			
+			mocap = Bvh(f.read())
+			frame_end = mocap.nframes
 		print("Importing is successful !!!")
 	except:
 		print("Couln't open file: {}".format(file_path))
@@ -35,12 +46,16 @@ def Export_Bvh(file_path):
 	try:
 		if os.path.exists(file_path):
 			os.remove(file_path)		
-		bpy.context.scene.render.fps = 20  # We configure the frame rate		
+		bpy.context.scene.render.fps = 60  # We configure the frame rate		
 		bpy.ops.export_anim.bvh(filepath=file_path, global_scale = 1, frame_start= frame_start, frame_end= frame_end, rotate_mode='NATIVE', root_transform_only=True)
 		print("Exporting is successful !!!")
 	except:
 		print("Couldn't export file")
 
+def Delete_Bvh():
+	bpy.ops.object.mode_set(mode='OBJECT')
+	bpy.ops.object.delete(use_global=False)
+	print ("Delete done")
 
 """"""""""""""""""""""""""""" Machine Learning """""""""""""""""""""""""""""""""""""""
 
@@ -78,7 +93,7 @@ def Kmeans_Clustering_Preview(K):
 	plt.show()
 
 def Kmeans_Clustering():
-	K = 100
+	K = 50
 	data = Get_Data_Rotation()
 	repeat = 5
 	mindiff = 0.0
@@ -100,8 +115,8 @@ def Kmeans_Clustering():
 	for label in labels:
 		data.append(Centroids[label])
 	data.remove([])
-	data = np.array(data)
-	smoothData = Bspline_Rotation_Data(labels, data)	
+	data = np.array(data)	
+	#smoothData = Bspline_Rotation_Data(labels, data)	
 	return data
 
 	#anch = [[]]
@@ -117,13 +132,13 @@ def Kmeans_Clustering():
 
 def Bspline_Rotation_Data(labels, data):
 	#This funtion do smooth rotation data
-
+	print("Start Bspline")
 	knots_array = [[]]
 	z = []
 	k = 2
-	for i in range(0, int(len(labels)/5)):
-		z.append(i*5)
-		knots_array.append(data[labels[i*5]])
+	for i in range(0, int(len(labels)/20)):
+		z.append(i*20)
+		knots_array.append(data[labels[i*20]])
 	knots_array.remove([])
 	knots_array = np.array(knots_array)
 	#print ("knots_array: ", knots_array)
@@ -145,7 +160,7 @@ def Bspline_Rotation_Data(labels, data):
 	spl_6 = BSpline(z, x6, k)
 	spl_7 = BSpline(z, x7, k)
 	spl_8 = BSpline(z, x8, k)
-	spl_9 = BSpline(z, x9, k)	
+	spl_9 = BSpline(z, x9, k)
 	smooth_data = []
 	#spl_1_data = []
 	#spl_1_ind = []
@@ -160,6 +175,7 @@ def Bspline_Rotation_Data(labels, data):
 	#ax.grid(True)
 	#ax.legend(loc='best')
 	#plt.show()
+	print('Smooth Done !!!')
 	return smooth_data
 
 def Bspline_Location_Data(data):
@@ -192,6 +208,7 @@ def Bspline_Location_Data(data):
 	for i in range(0, len(data)):
 		_Smooth_data.append([spl_1(i), spl_2(i), spl_3(i), spl_4(i), spl_5(i), spl_6(i)])
 	_Smooth_data = np.array(_Smooth_data)
+	print("Smooth data done")
 	return _Smooth_data	
 	""" this is plot data after smoothly
 	spl_1_ind = []
@@ -212,8 +229,6 @@ def Pca_Rotation(pca_components):
 	print('facebook pca time: error: %E' % (err))
 	return np.dot(U,np.diag(s))
 
-
-
 """"""""""""""""""""""""""""" Execute Data """""""""""""""""""""""""""""
 
 def Get_Data_Rotation():
@@ -231,28 +246,13 @@ def Get_Data_Rotation():
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
 
-def Get_Data_Location():
-	#This function to get all data lotation of bones
+def Get_Basic_Motion():
+	global basic_motion
+	basic_motion = Kmeans_Clustering()
 
-	Edit_Data_Rotation()
-	sce = bpy.context.scene
-	frame_start = 1
-	frame_end = 6180
-	ob = bpy.context.object
-	LOTATION_KEY_DATA = []
-	for f in range(frame_start, frame_end):
-		sce.frame_set(f)
-		location_bone = []
-		for pbone in ob.pose.bones:
-			if pbone.name != "RightShoulder":
-				location_bone.extend(pbone.head)			
-		LOTATION_KEY_DATA.append(location_bone)
-	LOTATION_KEY_DATA = np.array(LOTATION_KEY_DATA)
-	return LOTATION_KEY_DATA
-
-def Edit_Data_Rotation():
-	# This funtion to change rotation data of bone
-	
+def Edit_Data_Rotation_Foots():
+	# This funtion to change rotation Foots data of bone
+	print(basestring.shape)
 	data = Kmeans_Clustering()	
 	sce = bpy.context.scene
 	ob = bpy.context.object	
@@ -280,64 +280,63 @@ def Edit_Data_Rotation():
 			context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 			#IPython.embed()
 	bpy.ops.object.mode_set(mode='OBJECT')
-	print("Edit rotation done")
+	print("Edit rotation done")	
 
-def Edit_Data_Lotation():
-	# This funtion to change lotation data of bone
-
-	data = Change_Lotation_Data()
-	frame_start = 1
-	frame_end = 6180
+def Edit_Data_Rotation_Body():
+	# This funtion to change rotation data of bone
 	sce = bpy.context.scene
-	ob = bpy.context.object
-	keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
-	context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
-	bpy.ops.object.mode_set(mode='EDIT')
-	for f in range(frame_start, frame_end):
-		sce.frame_set(f)
-		keyFrame = context.scene.frame_current		
-		for pbone in ob.pose.bones:			
-			if pbone.name == "RightElbow":
-				bone = ob.data.edit_bones[pbone.name]
-				bone.head.x = data[f - 1][0]
-				bone.head.y = data[f - 1][1]
-				bone.head.z = data[f - 1][2]	
-			elif pbone.name == "RightWrist":
-				bone = ob.data.edit_bones[pbone.name]
-				bone.head.x = data[f - 1][3]
-				bone.head.y = data[f - 1][4]
-				bone.head.z = data[f - 1][5]
-			bpy.context.scene.update()
-			pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
-	context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
-	bpy.ops.object.mode_set(mode='OBJECT')
-	print("Edit location done")
-
-def Isolate_Ingredient_Data():
-	sce = bpy.context.scene
-	ob = bpy.context.object
-	frame_start = 1
-	frame_end = 6180
-	BoneNames = ["RightShoulder","RightElbow","RightWrist"]
-	for f in range(frame_start, frame_end):
-		sce.frame_set(f)
+	ob = bpy.context.object	
+	bpy.ops.object.mode_set(mode='POSE')
+	lt = 0
+	for f in range(frame_start, frame_end):	
+		frameSet = f + 1
+		sce.frame_set(frameSet)
 		keyFrame = context.scene.frame_current
 		keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
-		for pbone in ob.pose.bones:			
-			if pbone.name not in BoneNames:
-				lastMode = pbone.rotation_mode
-				pbone.rotation_mode = "XYZ"
-				bpy.ops.object.mode_set(mode='POSE')
-				pbone.bone.select = True
-				pbone.rotation_euler.x = math.radians(90)
-				pbone.rotation_euler.y = math.radians(90)
-				pbone.rotation_euler.z = math.radians(90)
-				bpy.context.scene.update()
-				pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
-				context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
-				bpy.ops.object.mode_set(mode='OBJECT')
-				pbone.rotation_mode = lastMode				
-	print ("Done !!!")
+		context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
+		nbone = 0
+		for pbone in ob.pose.bones:
+			IPython.embed()
+			lastMode = pbone.rotation_mode
+			pbone.rotation_mode = "XYZ"			
+			pbone.bone.select = True
+			if pbone.name == 'Hips':
+				pbone.rotation_euler = basic_motion[frameSet][0: 3]
+			elif pbone.name == 'Chest':
+				pbone.rotation_euler = basic_motion[frameSet][3: 6]
+			elif pbone.name == 'Chest2':
+				pbone.rotation_euler = basic_motion[frameSet][6: 9]
+			elif pbone.name =='Chest3':
+				pbone.rotation_euler = basic_motion[frameSet][9: 12]
+			elif pbone.name == 'Chest4':
+				pbone.rotation_euler = basic_motion[frameSet][12: 15]
+			elif pbone.name == 'Neck':
+				pbone.rotation_euler = basic_motion[frameSet][15: 18]
+			elif pbone.name == 'Head':
+				pbone.rotation_euler = basic_motion[frameSet][18: 21]
+			elif pbone.name == 'RightCollar':
+				pbone.rotation_euler = basic_motion[frameSet][21: 24]
+			elif pbone.name == 'RightShoulder':
+				pbone.rotation_euler = basic_motion[frameSet][24: 27]
+			elif pbone.name == 'RightElbow':
+				pbone.rotation_euler = basic_motion[frameSet][27: 30]
+			elif pbone.name == 'RightWrist':
+				pbone.rotation_euler = basic_motion[frameSet][30: 33]
+			elif pbone.name == 'LeftCollar':
+				pbone.rotation_euler = basic_motion[frameSet][33: 36]
+			elif pbone.name == 'LeftShoulder':
+				pbone.rotation_euler = basic_motion[frameSet][36: 39]
+			elif pbone.name == 'LeftElbow':
+				pbone.rotation_euler = basic_motion[frameSet][39: 42]
+			elif pbone.name == 'LeftWrist':
+				pbone.rotation_euler = basic_motion[frameSet][42: 45]
+		bpy.context.scene.update()
+		pbone.keyframe_insert(data_path="rotation_euler" ,frame=keyFrame)
+		pbone.rotation_mode = lastMode
+		context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
+		
+	bpy.ops.object.mode_set(mode='OBJECT')
+	print("Edit rotation done")
 
 def Edit_Rotation_Bone( BoneName, FrameNumber, ValueX, ValueY, ValueZ, bdegrees =True):
 	sce = bpy.context.scene
