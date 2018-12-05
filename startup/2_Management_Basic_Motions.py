@@ -5,35 +5,30 @@ import bpy
  
 
 #   Layout panel
-class LayoutPanel(bpy.types.Panel):
-	bl_label = "Style Learning Management"
+class BasicMotionsManagement(bpy.types.Panel):
+	bl_label = "Basic Motions Management"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "TOOL_PROPS"
  
+	@classmethod
+	def poll(self,context):
+		return context.object is not None
+
 	def draw(self, context):
 		layout = self.layout
-		
-		# Creat Basic motions
-		layout.label("Creat Basic motions")
-		row = layout.row()
-		row.alignment = 'LEFT'
-		row.operator("my.button", text="Import BVH file", icon = 'IMPORT').number=1
-		row.operator("my.button", text="Export BVH file", icon = 'EXPORT').number=2
-
 		# Read Basic motions
-		layout.label("Read Basic motions")
 
 		layout.label("Upper Body", icon = 'OUTLINER_OB_ARMATURE')
 		row = layout.row()
 		col = row.column()
 		subrow = row.column()
-		subrow.operator("my.button", text="Chay Dan", icon = 'POSE_DATA').number = 3
-		subrow.operator("my.button", text="Hoa Sen No", icon = 'POSE_DATA').number = 4
-		subrow.operator("my.button", text="Le Phat", icon = 'POSE_DATA').number = 5
-		subrow.operator("my.button", text="Quay Soi", icon = 'POSE_DATA').number = 6
-		subrow.operator("my.button", text="Bat Quyet", icon = 'POSE_DATA').number = 7
+		subrow.operator("my.button", text="Chay Dan", icon = 'POSE_DATA').number = 1
+		subrow.operator("my.button", text="Hoa Sen No", icon = 'POSE_DATA').number = 2
+		subrow.operator("my.button", text="Le Phat", icon = 'POSE_DATA').number = 3
+		subrow.operator("my.button", text="Quay Soi", icon = 'POSE_DATA').number = 4
+		subrow.operator("my.button", text="Bat Quyet", icon = 'POSE_DATA').number = 5
 		subrow = row.column(align=True)
-		subrow.operator("my.button", text="Dang Hoa", icon = 'POSE_DATA').loc="5 21"
+		subrow.operator("my.button", text="Dang Hoa", icon = 'POSE_DATA')
 		subrow.operator("my.button", text="Bay", icon = 'POSE_DATA')
 		subrow.operator("my.button", text="Dung Tay", icon = 'POSE_DATA')
 		subrow.operator("my.button", text="Dang Len Cao", icon = 'POSE_DATA')
@@ -82,31 +77,8 @@ class LayoutPanel(bpy.types.Panel):
 		subrow.operator("my.button", text="Tau Nhac", icon = 'POSE_DATA').loc="5 21"
 		subrow.operator("my.button", text="Hai Chan Bat Cheo", icon = 'POSE_DATA')
 
-		layout.label("Update Basic motions")
-		row = layout.row()
-		box = row.box()
-		box.operator("my.button", text="11", emboss=False).loc="4 11"
-		box.operator("my.button", text="12", emboss=False).loc="4 12"
-		col = row.column()
-		subrow = col.row()
-		subrow.operator("my.button", text="13").loc="4 13"
-		subrow.operator("my.button", text="14").loc="4 14"
-		subrow = col.row(align=True)
-		subrow.operator("my.button", text="15").loc="4 15"
-		subrow.operator("my.button", text="16").loc="4 16"
-		box = row.box()
-		box.operator("my.button", text="17").number=17
-		box.separator()
-		box.operator("my.button", text="18")
-		box.operator("my.button", text="19")
- 
-		layout.label("Delete Basic motions")
-		row = layout.row()
-		row.alignment = 'LEFT'
-		row.operator("my.button", text="Delete Basic Motions")
-
 #   Button
-class OBJECT_OT_Button(bpy.types.Operator):
+class OBJECT_BasicMotion_Button(bpy.types.Operator):
 	bl_idname = "my.button"
 	bl_label = "Button"
 	number = bpy.props.IntProperty()
@@ -122,4 +94,11 @@ class OBJECT_OT_Button(bpy.types.Operator):
 		return{'FINISHED'}    
  
 #    Registration
-bpy.utils.register_module(__name__)
+def register():
+	bpy.utils.register_module(__name__)
+
+def unregister():
+	bpy.utils.unregister_module(__name__)
+
+if __name__ == "__main__":
+	register()
