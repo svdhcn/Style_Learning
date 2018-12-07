@@ -5,8 +5,8 @@ import bpy
  
 # ImportHelper is a helper class, defines filename and
 # invoke() function which calls the file selector.
-from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty, BoolProperty, EnumProperty
+from bpy_extras.io_utils import ImportHelper, ExportHelper
+from bpy.props import StringProperty, BoolProperty, EnumProperty, IntProperty
 from bpy.types import Operator
 
 # Class Creat Basic Motions
@@ -24,13 +24,71 @@ class BvhFileManagement(bpy.types.Panel):
 		# Creat Basic motions
 		row = layout.row()
 		row.alignment = 'LEFT'
-		row.operator("my.button", text="Import BVH file", icon = 'IMPORT')
-		#row.operator("my.button", text="Export BVH file", icon = 'EXPORT').number=2
+		row.operator("wm.import", text="Import BVH file", icon = 'IMPORT')
+		row.operator("wm.export", text="Export BVH file", icon = 'EXPORT')
+
+class ExportBvhData(Operator, ExportHelper):
+	bl_idname = "wm.export"
+	bl_label = "Export BVH Data"
+
+	filename_ext = ".bvh"
+
+	filter_glob = StringProperty(
+			default="*.bvh",
+			options={'HIDDEN'},
+			maxlen=255,  # Max internal buffer length, longer would be clamped.
+			)
+
+	scale = IntProperty(
+		name = "Scale",
+		description = "Scale",
+		default = 1,
+		min = 1
+		)
+
+	startFrame = IntProperty(
+		name = "Start Frame",
+		description = "Start Frame",
+		default = 0,
+		min = 0
+		)
+
+	endFrame = IntProperty(
+		name = "End Frame",
+		description = "End Frame",
+		default = 250,
+		min = 1
+		)
+
+	rotation = EnumProperty(
+			name="Rotation",
+			description="Choose items",
+			items=(('NATIVE', "Euler(Native)", ""),
+				   ('XYZ', "Euler(XYZ)", ""),
+				   ('XZY', "Euler(XZY)", ""),
+				   ('YXZ', "Euler(YXZ)", ""),
+				   ('YZX', "Euler(YZX)", ""),
+				   ('ZXY', "Euler(ZXY)", ""),
+				   ('ZYX', "Euler(ZYX)", "")),
+			default='NATIVE',
+			)
+
+	translation = BoolProperty(
+            name="Root Translation Only",
+            description="Root Translation Only",
+            default= True,
+            )
 
 
-class ImportSomeData(Operator, ImportHelper):
+	def execute(self, context):
+		bpy.context.scene.render.fps = 60		
+		print ("hello, this is function export")
+		return bpy.ops.export_anim.bvh(filepath=self.filepath, global_scale = self.Scale, frame_start= self.startFrame, frame_end= self.endFrame, rotate_mode=self.rotation, root_transform_only=self.translation)
+
+
+class ImportBvhData(Operator, ImportHelper):
 	"""This appears in the tooltip of the operator and in the generated docs"""
-	bl_idname = "my.button"  # important since its how bpy.ops.import_test.some_data is constructed
+	bl_idname = "wm.import"  # important since its how bpy.ops.import_test.some_data is constructed
 	bl_label = "Import BVH Data"
 
 	# ImportHelper mixin class uses this
@@ -70,7 +128,7 @@ class ImportSomeData(Operator, ImportHelper):
 			)
 	Rotation = EnumProperty(
 			name="Rotation",
-			description="Choose between two items",
+			description="Choose items",
 			items=(('Quaternion', "Quaternion", ""),
 				   ('NATIVE', "Euler(Native)", ""),
 				   ('XYZ', "Euler(XYZ)", ""),
@@ -83,27 +141,22 @@ class ImportSomeData(Operator, ImportHelper):
 			)
 
 	def execute(self, context):
-		print ("The local file path is:", self.filepath)
-		print("Forward", self.Forward)
-		print("Up", self.Up)
-		print("Rotation", self.Rotation)
 		return bpy.ops.import_anim.bvh(filepath= self.filepath, axis_forward=self.Forward, axis_up=self.Up, rotate_mode=self.Rotation)
-		#return read_some_data(context, self.filepath, self.use_setting)
 
- #    Registration
-#bpy.utils.register_module(__name__)
  
 #    Registration
 def register():
-	bpy.utils.register_class(ImportSomeData)
+	bpy.utils.register_class(ImportBvhData)
+	#bpy.utils.register_class(ExportBvhData)
 	bpy.utils.register_module(__name__)
 
 def unregister():
-	bpy.utils.register_class(ImportSomeData)
+	bpy.utils.register_class(ImportBvhData)
+	#bpy.utils.register_class(ExportBvhData)
 	bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
 	register()
 
 	# test call
-	bpy.ops.import_test.some_data('INVOKE_DEFAULT')
+	#bpy.ops.import_test.some_data('INVOKE_DEFAULT')
