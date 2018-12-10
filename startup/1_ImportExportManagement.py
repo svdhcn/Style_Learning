@@ -1,10 +1,8 @@
 #----------------------------------------------------------
-# File layout.py
+# File BvhFileManagement
 #----------------------------------------------------------
 import bpy
- 
-# ImportHelper is a helper class, defines filename and
-# invoke() function which calls the file selector.
+
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty, IntProperty
 from bpy.types import Operator
@@ -83,7 +81,7 @@ class ExportBvhData(Operator, ExportHelper):
 	def execute(self, context):
 		bpy.context.scene.render.fps = 60		
 		print ("hello, this is function export")
-		return bpy.ops.export_anim.bvh(filepath=self.filepath, global_scale = self.Scale, frame_start= self.startFrame, frame_end= self.endFrame, rotate_mode=self.rotation, root_transform_only=self.translation)
+		return bpy.ops.export_anim.bvh(filepath=self.filepath, global_scale = self.scale, frame_start= self.startFrame, frame_end= self.endFrame, rotate_mode=self.rotation, root_transform_only=self.translation)
 
 
 class ImportBvhData(Operator, ImportHelper):
@@ -103,7 +101,7 @@ class ImportBvhData(Operator, ImportHelper):
 	# List of operator properties, the attributes will be assigned
 	# to the class instance from the operator settings before calling.
 
-	Forward = EnumProperty(
+	forward = EnumProperty(
 			name="Forward",
 			description="Choose items",
 			items=(('X', "X Forward", ""),
@@ -115,7 +113,7 @@ class ImportBvhData(Operator, ImportHelper):
 			default='Y',
 			)
 
-	Up = EnumProperty(
+	up = EnumProperty(
 			name="Up",
 			description="Choose items",
 			items=(('X', "X Up", ""),
@@ -126,7 +124,7 @@ class ImportBvhData(Operator, ImportHelper):
 				   ('-Z', "-Z Up", "")),
 			default='Z',
 			)
-	Rotation = EnumProperty(
+	rotation = EnumProperty(
 			name="Rotation",
 			description="Choose items",
 			items=(('Quaternion', "Quaternion", ""),
@@ -141,7 +139,8 @@ class ImportBvhData(Operator, ImportHelper):
 			)
 
 	def execute(self, context):
-		return bpy.ops.import_anim.bvh(filepath= self.filepath, axis_forward=self.Forward, axis_up=self.Up, rotate_mode=self.Rotation)
+		bpy.context.scene.render.fps = 60
+		return bpy.ops.import_anim.bvh(filepath= self.filepath, axis_forward=self.forward, axis_up=self.up, rotate_mode=self.rotation)
 
  
 #    Registration
