@@ -45,7 +45,28 @@ class MySettings(PropertyGroup):
 		min = 1
 		)
 
-	my_enum = EnumProperty(
+	Posture_Basics = EnumProperty(
+		name = "Posture Basics:",
+		description = "Apply Data to attribute.",
+		items=[ ('TuTheTay1', "Chay Dan", ""),
+				('TuTheTay2', "Dang Hoa", ""),
+				('TuTheTay3', "Dang Ruou", ""),
+				('TuTheTay4', "Cuop Bong", ""),
+				('TuTheTay5', "Tau Nhac", ""),
+				('TuTheChan1', "Chan Chu V", ""),
+				('TuTheChan2', "Chan Chu Chi", ""),
+				('TuTheChan3', "Chan Qua Tram", ""),
+				('TuTheChan4', "Chan Chu Dinh", ""),
+				('TuTheChan5', "Dem Got", ""),
+				('TuTheNgoi1', "Chan Chong Chan Quy", ""),
+				('TuTheNgoi2', "Hai Dau Goi Cung Quy", ""),
+				('TuTheNgoi3', "Hai Chan Co Ve Mot Ben", ""),
+				('TuTheNgoi4', "Duoi Thang Hai Chan", ""),
+				('TuTheNgoi5', "Hai Chan Bat Cheo", "")				
+			   ]
+		)
+
+	Basic_Motions = EnumProperty(
 		name="Basic Motions:",
 		description="Apply Data to attribute.",
 		items=[ ('ChayDan', "Chay Dan", ""),
@@ -98,11 +119,17 @@ class MySettings(PropertyGroup):
 
 class UpdateMotionOperator(bpy.types.Operator):
 	bl_idname = "wm.update_motions"
-	bl_label = "Update Basic Motions"
+	bl_label = "Create Basic Motions"
 
 	def execute(self, context):
 		scene = context.scene
 		mytool = scene.my_tool
+
+		bpy.context.scene.render.fps = 60		
+		print ("hello, this is function export")
+		print (bpy.ops.export_anim.bvh(filepath= "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/test.bvh", global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame))
+
+
 
 		# print the values to the console
 		print("Hello World")
@@ -136,7 +163,8 @@ class OBJECT_PT_my_panel(Panel):
 		scene = context.scene
 		mytool = scene.my_tool
 
-		layout.prop(mytool, "my_enum", text="") 
+		layout.prop(mytool, "Posture_Basics", text="")
+		layout.prop(mytool, "Basic_Motions", text="") 
 		layout.prop(mytool, "Start_Frame")
 		layout.prop(mytool, "End_Frame")
 		layout.operator("wm.update_motions")

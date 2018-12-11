@@ -1,7 +1,10 @@
 #----------------------------------------------------------
 # File layout.py
+# Rotation data is stored in a text file
+# Every changes to the bvh file has to update on the corresponding text file
 #----------------------------------------------------------
 import bpy
+from SQL_Motions import select_basic_movement_by_base
  
 
 #   Layout panel
@@ -84,7 +87,7 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 	number = bpy.props.IntProperty()
 	row = bpy.props.IntProperty()
 	loc = bpy.props.StringProperty()
- 
+
 	def execute(self, context):
 		if self.number == 1:
 			print ("Chay Dan")
@@ -94,12 +97,8 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 			print ("Le Phat")
 		else:
 			print ("Huan")
-		if self.loc:
-			words = self.loc.split()
-			self.row = int(words[0])
-			self.number = int(words[1])
-		print("Row %d button %d" % (self.row, self.number))
-		return{'FINISHED'}    
+		
+		return{'FINISHED'}
  
 #    Registration
 def register():
