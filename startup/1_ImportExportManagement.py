@@ -1,3 +1,16 @@
+bl_info = {
+	"name": "Add-on Import - Export BVH management",
+	"description": "",
+	"author": "Huan Vu Huu",
+	"version": (0, 0, 1),
+	"blender": (2, 79, 0),
+	"location": "3D View > Tools",
+	"warning": "", # used for warning icon and text in addons panel
+	"wiki_url": "",
+	"tracker_url": "",
+	"category": "Development"
+}
+
 #----------------------------------------------------------
 # File BvhFileManagement
 #----------------------------------------------------------

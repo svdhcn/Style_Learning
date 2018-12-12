@@ -1,9 +1,9 @@
 bl_info = {
-	"name": "Add-on Template",
+	"name": "Add-on Update Basic Motions",
 	"description": "",
-	"author": "",
+	"author": "Huan Vu Huu",
 	"version": (0, 0, 1),
-	"blender": (2, 70, 0),
+	"blender": (2, 79, 0),
 	"location": "3D View > Tools",
 	"warning": "", # used for warning icon and text in addons panel
 	"wiki_url": "",
@@ -12,6 +12,7 @@ bl_info = {
 }
 
 import bpy
+from SQL_Motions import add_new_base_pose, add_new_basic_movement, create_connection, select_basic_movement_by_base, select_all_basics
 import os.path
 from bpy.props import (StringProperty,
 					   BoolProperty,
@@ -69,7 +70,7 @@ class MySettings(PropertyGroup):
 	path = StringProperty(
         name="Path",
         description="Path to Directory",
-        default="/tmp/",
+        default="/home/",
         maxlen=1024,
         subtype='FILE_PATH')
 
@@ -136,6 +137,23 @@ class UpdateMotionOperator(bpy.types.Operator):
 		if os.path.exists(file_path):
 			os.remove(file_path)
 		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame)
+		
+		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/dance.db"
+		conn = create_connection(database)
+		with conn:
+			new_base_pose = (mytool.Posture_Basics, mytool.path)
+			base_pose_id = add_new_base_pose(conn, new_base_pose)
+			print(base_pose_id)
+			print("1. Query basic movement by base id:")
+			select_basic_movement_by_base(conn,1)
+			
+			new_basic_movement = (base_pose_id,mytool.Basic_Motions, mytool.path)
+			basic_movement_id = add_new_basic_movement(conn, new_basic_movement)
+			print(basic_movement_id)
+			
+			print("2. Query all basic movements")
+			select_all_basics(conn)
+			new_base_pose = (mytool.Basic_Motions, mytool.path)
 
 
 
