@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy
-
+import os.path
 from bpy.props import (StringProperty,
 					   BoolProperty,
 					   IntProperty,
@@ -48,68 +48,74 @@ class MySettings(PropertyGroup):
 	Posture_Basics = EnumProperty(
 		name = "Posture Basics:",
 		description = "Apply Data to attribute.",
-		items=[ ('TuTheTay1', "Chay Dan", ""),
-				('TuTheTay2', "Dang Hoa", ""),
-				('TuTheTay3', "Dang Ruou", ""),
-				('TuTheTay4', "Cuop Bong", ""),
-				('TuTheTay5', "Tau Nhac", ""),
-				('TuTheChan1', "Chan Chu V", ""),
-				('TuTheChan2', "Chan Chu Chi", ""),
-				('TuTheChan3', "Chan Qua Tram", ""),
-				('TuTheChan4', "Chan Chu Dinh", ""),
-				('TuTheChan5', "Dem Got", ""),
-				('TuTheNgoi1', "Chan Chong Chan Quy", ""),
-				('TuTheNgoi2', "Hai Dau Goi Cung Quy", ""),
-				('TuTheNgoi3', "Hai Chan Co Ve Mot Ben", ""),
+		items=[ ('TuTheNgoi5', "Hai Chan Bat Cheo", ""),
 				('TuTheNgoi4', "Duoi Thang Hai Chan", ""),
-				('TuTheNgoi5', "Hai Chan Bat Cheo", "")				
+				('TuTheNgoi3', "Hai Chan Co Ve Mot Ben", ""),
+				('TuTheNgoi2', "Hai Dau Goi Cung Quy", ""),
+				('TuTheNgoi1', "Chan Chong Chan Quy", ""),
+				('TuTheChan5', "Dem Got", ""),
+				('TuTheChan4', "Chan Chu Dinh", ""),
+				('TuTheChan3', "Chan Qua Tram", ""),
+				('TuTheChan2', "Chan Chu Chi", ""),
+				('TuTheChan1', "Chan Chu V", ""),
+				('TuTheTay5', "Tau Nhac", ""),
+				('TuTheTay4', "Cuop Bong", ""),
+				('TuTheTay3', "Dang Ruou", ""),
+				('TuTheTay2', "Dang Hoa", ""),
+				('TuTheTay1', "Chay Dan", "")
 			   ]
 		)
+
+	path = StringProperty(
+        name="Path",
+        description="Path to Directory",
+        default="/tmp/",
+        maxlen=1024,
+        subtype='FILE_PATH')
 
 	Basic_Motions = EnumProperty(
 		name="Basic Motions:",
 		description="Apply Data to attribute.",
-		items=[ ('ChayDan', "Chay Dan", ""),
-				('HoaSenNo', "Hoa Sen No", ""),
-				('LePhat', "Le Phat", ""),
-				('QuaySoi', "Quay Soi", ""),
-				('BatQuyet', "Bat Quyet", ""),
-				('DangHoa', "Dang Hoa", ""),
-				('Bay', "Bay", ""),
-				('DungTay', "Dung Tay", ""),
-				('DangLenCao', "Dang Len Cao", ""),
-				('PhayTay', "Phay Tay", ""),
-				('ChongSuon', "Chong Suon", ""),
-				('DuaThoi', "Dua Thoi", ""),
-				('VunGon', "Vun Gon", ""),
-				('DangRuou', "Dang Ruou", ""),
-				('Vay', "Vay", ""),
-				('SoiBong', "Soi Bong", ""),
-				('RotRuou', "Rot Ruou", ""),
-				('CheoDo', "Cheo Do", ""),
-				('RacDau', "Rac Dau", ""),
-				('DayThuyen', "Day Thuyen", ""),
-				('XeTo', "Xe To", ""),
-				('CuopBong', "Cuop Bong", ""),
-				('DeTho', "De Tho", ""),
-				('PhuiTayAo', "Phui Tay Ao", ""),
-				('LanTayAo', "Lan Tay Ao", ""),
-				('GatLua', "Gat Lua", ""),
-				('TauNhac', "Tau Nhac", ""),
-				('VuotToc', "Vuot Toc", ""),
-				('Ganh', "Ganh", ""),
-				('XeTo', "Xe To", ""),
-				('Nem', "Nem", ""),
-				('ChanChuV', "Chan Hinh Chu V", ""),
-				('ChanChi', "Chan Chu Chi", ""),
-				('ChanTram', "Chan Qua Tram", ""),
-				('ChanDinh', "Chan Chu Dinh", ""),
-				('ChanDem', "Chan Dem Got", ""),
-				('ChanChongQuy', "Chan Chong Chan Quy", ""),
-				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
-				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
+		items=[ ('ChanBatCheo', "Hai Chan Bat Cheo", ""),
 				('DuoiHaiChan', "Duoi Thang Hai Chan", ""),
-				('ChanBatCheo', "Hai Chan Bat Cheo", ""),
+				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
+				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
+				('ChanChongQuy', "Chan Chong Chan Quy", ""),
+				('ChanDem', "Chan Dem Got", ""),
+				('ChanDinh', "Chan Chu Dinh", ""),
+				('ChanTram', "Chan Qua Tram", ""),
+				('ChanChi', "Chan Chu Chi", ""),
+				('ChanChuV', "Chan Hinh Chu V", ""),
+				('Nem', "Nem", ""),
+				('XeTo', "Xe To", ""),
+				('Ganh', "Ganh", ""),
+				('VuotToc', "Vuot Toc", ""),
+				('GatLua', "Gat Lua", ""),
+				('LanTayAo', "Lan Tay Ao", ""),
+				('PhuiTayAo', "Phui Tay Ao", ""),
+				('DeTho', "De Tho", ""),
+				('CuopBong', "Cuop Bong", ""),
+				('XeTo', "Xe To", ""),
+				('DayThuyen', "Day Thuyen", ""),
+				('RacDau', "Rac Dau", ""),
+				('CheoDo', "Cheo Do", ""),
+				('RotRuou', "Rot Ruou", ""),
+				('SoiBong', "Soi Bong", ""),
+				('Vay', "Vay", ""),
+				('DangRuou', "Dang Ruou", ""),
+				('VunGon', "Vun Gon", ""),
+				('DuaThoi', "Dua Thoi", ""),
+				('ChongSuon', "Chong Suon", ""),
+				('PhayTay', "Phay Tay", ""),
+				('DangLenCao', "Dang Len Cao", ""),
+				('DungTay', "Dung Tay", ""),
+				('Bay', "Bay", ""),
+				('DangHoa', "Dang Hoa", ""),
+				('BatQuyet', "Bat Quyet", ""),
+				('QuaySoi', "Quay Soi", ""),
+				('LePhat', "Le Phat", ""),
+				('HoaSenNo', "Hoa Sen No", ""),
+				('ChayDan', "Chay Dan", "")
 			   ]
 		)
 
@@ -124,10 +130,12 @@ class UpdateMotionOperator(bpy.types.Operator):
 	def execute(self, context):
 		scene = context.scene
 		mytool = scene.my_tool
+		file_path = mytool.path
 
-		bpy.context.scene.render.fps = 60		
-		print ("hello, this is function export")
-		print (bpy.ops.export_anim.bvh(filepath= "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/test.bvh", global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame))
+		bpy.context.scene.render.fps = 60
+		if os.path.exists(file_path):
+			os.remove(file_path)
+		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame)
 
 
 
@@ -138,7 +146,9 @@ class UpdateMotionOperator(bpy.types.Operator):
 		print("int value:", mytool.End_Frame)
 		#print("float value:", mytool.my_float)
 		#print("string value:", mytool.my_string)
-		print("enum state:", mytool.my_enum)
+		print("Posture Basics:", mytool.Posture_Basics)
+		print("Basic Motions:", mytool.Basic_Motions)
+		print ("path directory is:", mytool.path)
 
 		return {'FINISHED'}
 
@@ -162,9 +172,12 @@ class OBJECT_PT_my_panel(Panel):
 		layout = self.layout
 		scene = context.scene
 		mytool = scene.my_tool
-
+		layout.label("Posture Basics")
 		layout.prop(mytool, "Posture_Basics", text="")
-		layout.prop(mytool, "Basic_Motions", text="") 
+		layout.label("Basic Motions")
+		layout.prop(mytool, "Basic_Motions", text="")
+		layout.label("Path")
+		layout.prop(mytool, "path", text="")
 		layout.prop(mytool, "Start_Frame")
 		layout.prop(mytool, "End_Frame")
 		layout.operator("wm.update_motions")
