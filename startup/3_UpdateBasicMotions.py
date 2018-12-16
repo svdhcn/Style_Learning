@@ -137,7 +137,7 @@ class UpdateMotionOperator(bpy.types.Operator):
 		if os.path.exists(file_path):
 			os.remove(file_path)
 		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame)
-		
+		'''
 		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/dance.db"
 		conn = create_connection(database)
 		with conn:
@@ -155,19 +155,7 @@ class UpdateMotionOperator(bpy.types.Operator):
 			select_all_basics(conn)
 			new_base_pose = (mytool.Basic_Motions, mytool.path)
 
-
-
-		# print the values to the console
-		print("Hello World")
-		#print("bool state:", mytool.my_bool)
-		print("int value:", mytool.Start_Frame)
-		print("int value:", mytool.End_Frame)
-		#print("float value:", mytool.my_float)
-		#print("string value:", mytool.my_string)
-		print("Posture Basics:", mytool.Posture_Basics)
-		print("Basic Motions:", mytool.Basic_Motions)
-		print ("path directory is:", mytool.path)
-
+		'''
 		return {'FINISHED'}
 
 # ------------------------------------------------------------------------
