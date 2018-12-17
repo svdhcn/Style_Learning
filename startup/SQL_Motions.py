@@ -44,7 +44,7 @@ def select_all_basics(conn):
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM base_pose")
+    cur.execute("SELECT * FROM Basic_Motions")
  
     rows = cur.fetchall()
  
@@ -52,15 +52,15 @@ def select_all_basics(conn):
         print(row)
  
  
-def select_basic_movement_by_base(conn, base_id):
+def select_basic_movement_by_base(conn, Name_Motion):
     """
     Query basic movement by base movement id
     :param conn: the Connection object
-    :param base_id:
+    :param Name_Motion:
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM basic_movement WHERE base_id=?", (base_id,))
+    cur.execute("SELECT * FROM Basic_Motions WHERE Name_Motion=?", (Name_Motion,))
  
     rows = cur.fetchall()
  
@@ -75,7 +75,7 @@ def add_new_base_pose(conn, new_base_pose):
     return cur.lastrowid
 
 def add_new_basic_movement(conn, new_basic_movement):
-    sql = ''' INSERT INTO basic_movement(base_id, name, path)
+    sql = ''' INSERT INTO Basic_Motions(Id_Posture, Name_Motion, path)
               VALUES(?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, new_basic_movement)
@@ -83,23 +83,27 @@ def add_new_basic_movement(conn, new_basic_movement):
  
  
 def main():
-    database = "/home/huan/Documents_Master/Style_Learning/HumanStyle.db"
 
+    
+    #database = "/home/huan/Documents_Master/Style_Learning/HumanStyle.db"
+    database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
     #/home/Documents_Master/Style_Learning/Data_Motions/Posture/TayChayDan.bvh
     # create a database connection
     conn = create_connection(database)
     with conn:
-        new_basic_posture = ('C_BATCHEO','Chan Bat Cheo','/home/huan/Documents_Master/Style_Learning/Data_Motions/Posture/HaiChanBatCheo.bvh')
-        basic_posture_id = add_new_base_pose(conn, new_basic_posture)
-        print(basic_posture_id)
+        #new_basic_posture = ('C_BATCHEO','Chan Bat Cheo','/home/huan/Documents_Master/Style_Learning/Data_Motions/Posture/HaiChanBatCheo.bvh')
+        #basic_posture_id = add_new_base_pose(conn, new_basic_posture)
+        #print(basic_posture_id)
         #print("1. Query basic movement by base id:")
         #select_basic_movement_by_base(conn,1)
 
         #new_basic_movement = (base_pose_id,'Dang Hoa','/home/name/location/danghoa.bvh')
         #basic_movement_id = add_new_basic_movement(conn, new_basic_movement)
  
-        #print("2. Query all basic movements")
+        print("2. Query all basic movements")
         #select_all_basics(conn)
+        print (select_basic_movement_by_base(conn, "HoaSenNo"))
+    
 
  
  

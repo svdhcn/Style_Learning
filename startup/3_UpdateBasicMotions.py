@@ -50,7 +50,7 @@ class MySettings(PropertyGroup):
 		name = "Posture Basics:",
 		description = "Apply Data to attribute.",
 		items=[ ('TuTheNgoi5', "Hai Chan Bat Cheo", ""),
-				('TuTheNgoi4', "Duoi Thang Hai Chan", ""),
+				('TuTheNgoi4', "Hai Chan Duoi Thang", ""),
 				('TuTheNgoi3', "Hai Chan Co Ve Mot Ben", ""),
 				('TuTheNgoi2', "Hai Dau Goi Cung Quy", ""),
 				('TuTheNgoi1', "Chan Chong Chan Quy", ""),
@@ -78,7 +78,7 @@ class MySettings(PropertyGroup):
 		name="Basic Motions:",
 		description="Apply Data to attribute.",
 		items=[ ('ChanBatCheo', "Hai Chan Bat Cheo", ""),
-				('DuoiHaiChan', "Duoi Thang Hai Chan", ""),
+				('DuoiHaiChan', "Hai Chan Duoi Thang", ""),
 				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
 				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
 				('ChanChongQuy', "Chan Chong Chan Quy", ""),
@@ -87,36 +87,36 @@ class MySettings(PropertyGroup):
 				('ChanTram', "Chan Qua Tram", ""),
 				('ChanChi', "Chan Chu Chi", ""),
 				('ChanChuV', "Chan Hinh Chu V", ""),
-				('Nem', "Nem", ""),
-				('XeTo', "Xe To", ""),
+				('Nem', "Tay Nem", ""),
+				('XeTo5', "Tay Xe To The 5", ""),
 				('Ganh', "Ganh", ""),
-				('VuotToc', "Vuot Toc", ""),
-				('GatLua', "Gat Lua", ""),
+				('VuotToc', "Tay Vuot Toc", ""),
+				('GatLua', "Tay Gat Lua", ""),
 				('LanTayAo', "Lan Tay Ao", ""),
 				('PhuiTayAo', "Phui Tay Ao", ""),
-				('DeTho', "De Tho", ""),
-				('CuopBong', "Cuop Bong", ""),
-				('XeTo', "Xe To", ""),
-				('DayThuyen', "Day Thuyen", ""),
-				('RacDau', "Rac Dau", ""),
-				('CheoDo', "Cheo Do", ""),
-				('RotRuou', "Rot Ruou", ""),
+				('DeTho', "Tay De Tho", ""),
+				('CuopBong', "Tay Cuop Bong", ""),
+				('XeTo3', "Tay Xe To The 3", ""),
+				('DayThuyen', "Tay Day Thuyen", ""),
+				('RacDau', "Tay Rac Dau", ""),
+				('CheoDo', "Tay Cheo Do", ""),
+				('RotRuou', "Tay Rot Ruou", ""),
 				('SoiBong', "Soi Bong", ""),
-				('Vay', "Vay", ""),
-				('DangRuou', "Dang Ruou", ""),
-				('VunGon', "Vun Gon", ""),
-				('DuaThoi', "Dua Thoi", ""),
-				('ChongSuon', "Chong Suon", ""),
+				('Vay', "Tay Vay", ""),
+				('DangRuou', "Tay Dang Ruou", ""),
+				('VunGon', "Tay Vun Gon", ""),
+				('DuaThoi', "Tay Dua Thoi", ""),
+				('ChongSuon', "Tay Chong Suon", ""),
 				('PhayTay', "Phay Tay", ""),
-				('DangLenCao', "Dang Len Cao", ""),
-				('DungTay', "Dung Tay", ""),
-				('Bay', "Bay", ""),
-				('DangHoa', "Dang Hoa", ""),
-				('BatQuyet', "Bat Quyet", ""),
-				('QuaySoi', "Quay Soi", ""),
-				('LePhat', "Le Phat", ""),
-				('HoaSenNo', "Hoa Sen No", ""),
-				('ChayDan', "Chay Dan", "")
+				('DangLenCao', "Tay Dang Len Cao", ""),
+				('RungTay', "Rung Tay", ""),
+				('Bay', "Tay Bay", ""),
+				('DangHoa', "Tay Dang Hoa", ""),
+				('BatQuyet', "Tay Bat Quyet", ""),
+				('QuaySoi', "Tay Quay Soi", ""),
+				('LePhat', "Tay Le Phat", ""),
+				('HoaSenNo', "Tay Hoa Sen No", ""),
+				('ChayDan', "Tay Chay Dan", "")
 			   ]
 		)
 
@@ -137,25 +137,60 @@ class UpdateMotionOperator(bpy.types.Operator):
 		if os.path.exists(file_path):
 			os.remove(file_path)
 		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame)
-		'''
-		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/dance.db"
+
+		Id_Posture = ""
+		if mytool.Basic_Motions in ["ChayDan", "HoaSenNo", "LePhat", "QuaySoi", "BatQuyet"]:
+			Id_Posture = "T_CHAYDAN"
+		elif mytool.Basic_Motions in ["DangHoa", "Bay", "RungTay", "DangLenCao", "PhayTay", "ChongSuon", "DuaThoi", "VunGon"]:
+			Id_Posture = "T_DANGHOA"
+		elif mytool.Basic_Motions in ["DangRuou", "Vay", "SoiBong", "RotRuou", "CheoDo", "RacDau", "DayThuyen", "XeTo3"]:
+			Id_Posture = "T_DANGRUOU"
+		elif mytool.Basic_Motions in ["CuopBong", "DeTho", "PhuiTayAo", "LanTayAo", "GatLua"]:
+			Id_Posture = "T_CUOPBONG"
+		elif mytool.Basic_Motions in ["VuotToc", "Ganh", "XeTo5", "Nem"]:
+			Id_Posture = "T_TAUNHAC"
+		elif mytool.Basic_Motions in ["ChanChuV"]:
+			Id_Posture = "C_CHUV"
+		elif mytool.Basic_Motions in ["ChanChi"]:
+			Id_Posture = "C_CHUCHI"
+		elif mytool.Basic_Motions in ["ChanTram "]:
+			Id_Posture = "C_QUATRAM"
+		elif mytool.Basic_Motions in ["ChanDinh"]:
+			Id_Posture = "C_CHUDINH"
+		elif mytool.Basic_Motions in ["ChanDem"]:
+			Id_Posture = "C_DEMGOT"
+		elif mytool.Basic_Motions in ["ChanChongQuy"]:
+			Id_Posture = "C_CHONGQUY"
+		elif mytool.Basic_Motions in ["HaiChanQuy"]:
+			Id_Posture = "C_QUY"
+		elif mytool.Basic_Motions in ["NgoiMotBen"]:
+			Id_Posture = "C_COMOTBEN"
+		elif mytool.Basic_Motions in ["DuoiHaiChan"]:
+			Id_Posture = "C_DUOITHANG"
+		elif mytool.Basic_Motions in ["ChanBatCheo"]:
+			Id_Posture = "C_BATCHEO"
+
+		print (mytool.Basic_Motions)
+		print (Id_Posture)
+
+		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
 		conn = create_connection(database)
 		with conn:
-			new_base_pose = (mytool.Posture_Basics, mytool.path)
-			base_pose_id = add_new_base_pose(conn, new_base_pose)
-			print(base_pose_id)
-			print("1. Query basic movement by base id:")
-			select_basic_movement_by_base(conn,1)
+			#new_base_pose = (mytool.Posture_Basics, mytool.path)
+			#base_pose_id = add_new_base_pose(conn, new_base_pose)
+			#print(base_pose_id)
+			#print("1. Query basic movement by base id:")
+			#select_basic_movement_by_base(conn,1)
 			
-			new_basic_movement = (base_pose_id,mytool.Basic_Motions, mytool.path)
+			new_basic_movement = (Id_Posture,mytool.Basic_Motions, mytool.path)
 			basic_movement_id = add_new_basic_movement(conn, new_basic_movement)
 			print(basic_movement_id)
 			
-			print("2. Query all basic movements")
-			select_all_basics(conn)
-			new_base_pose = (mytool.Basic_Motions, mytool.path)
+			#print("2. Query all basic movements")
+			#select_all_basics(conn)
+			#new_base_pose = (mytool.Basic_Motions, mytool.path)
 
-		'''
+		
 		return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -178,8 +213,8 @@ class OBJECT_PT_my_panel(Panel):
 		layout = self.layout
 		scene = context.scene
 		mytool = scene.my_tool
-		layout.label("Posture Basics")
-		layout.prop(mytool, "Posture_Basics", text="")
+		#layout.label("Posture Basics")
+		#layout.prop(mytool, "Posture_Basics", text="")
 		layout.label("Basic Motions")
 		layout.prop(mytool, "Basic_Motions", text="")
 		layout.label("Path")
