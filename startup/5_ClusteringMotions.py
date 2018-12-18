@@ -33,6 +33,13 @@ from bpy.types import (Panel,
 
 class ClusterSettings(PropertyGroup):
 
+	NumberOfCluster = IntProperty(
+		name = "Number Of Clusters",
+		description="A integer property",
+		default = 50,
+		min = 0
+		)
+
 	path = StringProperty(
         name="Path",
         description="Path to Directory",
@@ -94,6 +101,11 @@ class ClusterMotionOperator(bpy.types.Operator):
 	bl_idname = "wm.cluster_motions"
 	bl_label = "Clustering Basic Motions"
 
+	List_Motions_Upper = ["ChayDan", "HoaSenNo", "LePhat", "QuaySoi", "BatQuyet","DangHoa", "Bay", "RungTay", "DangLenCao", "PhayTay", "ChongSuon", "DuaThoi", "VunGon",
+							"DangRuou", "Vay", "SoiBong", "RotRuou", "CheoDo", "RacDau", "DayThuyen", "XeTo3", "CuopBong", "DeTho", "PhuiTayAo", "LanTayAo", "GatLua",
+							"VuotToc", "Ganh", "XeTo5", "Nem"]
+	List_Motions_Lower = ["ChanChuV", "ChanChi", "ChanTram ", "ChanDinh", "ChanDem", "ChanChongQuy", "HaiChanQuy", "NgoiMotBen", "DuoiHaiChan", "ChanBatCheo"]
+
 	List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
 	List_Bones_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
@@ -125,6 +137,7 @@ class OBJECT_PT_cluster_panel(Panel):
 		scene = context.scene
 		clustertool = scene.cluster_tool
 		layout.prop(clustertool, "Basic_Motions", text="")
+		layout.prop(clustertool, "NumberOfCluster")
 		layout.prop(clustertool, "path", text="")
 		layout.operator("wm.cluster_motions")
 

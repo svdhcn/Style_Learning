@@ -94,16 +94,29 @@ class BasicMotionsManagement(bpy.types.Panel):
 		subrow.operator("my.button", text="Chan Qua Tram", icon = 'POSE_DATA').number = 40
 		subrow.operator("my.button", text="Hai Chan Bat Cheo", icon = 'POSE_DATA').number = 41
 
+def UpdatedFunction(self, context):
+	print("In update func....")
+	return
+
 #   Button
 class OBJECT_BasicMotion_Button(bpy.types.Operator):
 	bl_idname = "my.button"
-	bl_label = "Button"
+	bl_label = "Management Basic Motions"
 	number = bpy.props.IntProperty()
 	row = bpy.props.IntProperty()
 	loc = bpy.props.StringProperty()
 
-	def execute(self, context):
+	checkbox = bpy.props.BoolProperty(name = "Bool Property", default = 0, update = UpdatedFunction)
 
+	def execute(self, context):
+		print ("Management Basics")
+		return{'FINISHED'}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_props_dialog(self)
+	
+	def draw(self, context):
+		#pathMotion = []
 		Dict_Motion = {1: "ChayDan", 2 : "HoaSenNo", 3 : "LePhat", 4 : "QuaySoi", 5 : "BatQuyet", 6 : "DangHoa", 7 : "Bay", 8 : "RungTay", 9 : "DangLenCao", 10 : "PhayTay",
 		11 : "ChongSuon", 12 : "DuaThoi", 13 : "VunGon", 14 : "DangRuou", 15 : "Vay", 16 : "SoiBong", 17 : "RotRuou", 18 : "CheoDo", 19 : "RacDau", 20 : "DayThuyen",
 		21 : "XeTo3", 22 : "CuopBong", 23 : "DeTho", 24 : "PhuiTayAo", 25 : "LanTayAo", 26 : "GatLua", 27 : "TauNhac", 28 : "VuotToc", 29 : "Ganh", 30 : "XeTo5", 31 : "Nem",
@@ -116,9 +129,11 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 		with conn:
 			select_basic_movement_by_base(conn, Basic_Motion)
 
-		print ("Management Basics")
-		
-		return{'FINISHED'}
+		pathMotion = ["/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/ChanChongChanQuy.bvh", "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/HuanVH.bvh"]
+		print (pathMotion)
+		row = self.layout
+		for motion in pathMotion:
+			row.prop(self, "checkbox", text = motion)
  
 #    Registration
 def register():

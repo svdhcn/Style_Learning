@@ -32,8 +32,8 @@ data_location_hips = []
 basic_motion = []
 frame_start = 1
 frame_end = 1
-List_Bones_Body = ['Hips', 'Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
-List_Bones_Foots = ['Hips', 'RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
+List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
+List_Bones_LowerBody = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 """"""""""""""""""""""""""""" Machine Learning """""""""""""""""""""""""""""""""""""""
 
@@ -70,9 +70,21 @@ def Kmeans_Clustering_Preview(K):
 	plt.plot(Centroids[:,0],Centroids[:,1],'sm',markersize=8)
 	plt.show()
 
-def Kmeans_Clustering():
-	K = 100
-	data = Get_Data_Rotation()
+def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
+	# Read all File motions in data base, 
+	# Get all data Rotation in .bvh file	
+	for pathMotion in listPathMotions:
+		bpy.ops.import_anim.bvh(filepath= pathMotion, axis_forward="Y", axis_up="Z", rotate_mode="NATIVE")
+		with open(pathMotion) as f:
+			global frame_end			
+			mocap = Bvh(f.read())
+			frame_end = mocap.nframes
+		if body == "Upper":
+			data = Get_Data_Rotation_UpperBody()
+		elif body == "Lower":
+			data = Get_Data_Rotation_LowerBody()
+		bpy.ops.object.mode_set(mode='OBJECT')
+		bpy.ops.object.delete(use_global=False)
 	repeat = 5
 	mindiff = 0.0
 	labels = []
@@ -89,6 +101,12 @@ def Kmeans_Clustering():
 			Centroids = centroids
 			labels,_ = vq(data,Centroids)
 	#  end repeat
+	# Export cluster in .txt file
+	file = open(pathCluster, "w+")
+	file.write(str(Centroids))
+	file.close()
+	
+	'''
 	data = [[]]
 	for label in labels:
 		data.append(Centroids[label])
@@ -96,6 +114,7 @@ def Kmeans_Clustering():
 	data = np.array(data)	
 	#smoothData = Bspline_Rotation_Data(labels, data)	
 	return data
+	'''
 
 def Pca_Rotation(pca_components):
 	# This function to loss dimention data
@@ -108,10 +127,9 @@ def Pca_Rotation(pca_components):
 	return np.dot(U,np.diag(s))
 
 """"""""""""""""""""""""""""" Execute Data """""""""""""""""""""""""""""
+# This function to get all data rotation of bones
 
-def Get_Data_Rotation():
-	# This function to get all data rotation of bones
-
+def Get_Data_Rotation_UpperBody():	
 	sce = bpy.context.scene
 	ob = bpy.context.object
 	ROTATION_KEY_DATA = []
@@ -119,10 +137,26 @@ def Get_Data_Rotation():
 		sce.frame_set(f)
 		rotation_bone = []
 		for pbone in ob.pose.bones:
-			rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])								
+			if pbone.name in List_Bones_UpperBody:
+				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])								
 		ROTATION_KEY_DATA.append(rotation_bone)
 	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
 	return ROTATION_KEY_DATA
+
+def Get_Data_Rotation_LowerBody():	
+	sce = bpy.context.scene
+	ob = bpy.context.object
+	ROTATION_KEY_DATA = []
+	for f in range(frame_start, frame_end):
+		sce.frame_set(f)
+		rotation_bone = []
+		for pbone in ob.pose.bones:
+			if pbone.name in List_Bones_LowerBody:
+				rotation_bone.extend([pbone.rotation_euler.x, pbone.rotation_euler.y ,pbone.rotation_euler.z])								
+		ROTATION_KEY_DATA.append(rotation_bone)
+	ROTATION_KEY_DATA = np.array(ROTATION_KEY_DATA)
+	return ROTATION_KEY_DATA
+
 def Get_data_rotation_Body():
 	global data_rotation_body
 	data_rotation_body = Get_Data_Rotation()
