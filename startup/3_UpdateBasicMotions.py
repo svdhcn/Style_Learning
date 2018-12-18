@@ -136,7 +136,7 @@ class UpdateMotionOperator(bpy.types.Operator):
 		bpy.context.scene.render.fps = 60
 		if os.path.exists(file_path):
 			os.remove(file_path)
-		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame)
+		bpy.ops.export_anim.bvh(filepath= file_path, global_scale = 1, frame_start= mytool.Start_Frame, frame_end= mytool.End_Frame, rotate_mode='NATIVE', root_transform_only = True)
 
 		Id_Posture = ""
 		if mytool.Basic_Motions in ["ChayDan", "HoaSenNo", "LePhat", "QuaySoi", "BatQuyet"]:
@@ -169,9 +169,6 @@ class UpdateMotionOperator(bpy.types.Operator):
 			Id_Posture = "C_DUOITHANG"
 		elif mytool.Basic_Motions in ["ChanBatCheo"]:
 			Id_Posture = "C_BATCHEO"
-
-		print (mytool.Basic_Motions)
-		print (Id_Posture)
 
 		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
 		conn = create_connection(database)

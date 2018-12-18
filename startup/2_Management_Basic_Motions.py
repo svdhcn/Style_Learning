@@ -19,8 +19,6 @@ bl_info = {
 #----------------------------------------------------------
 import bpy
 from SQL_Motions import create_connection, select_basic_movement_by_base
- 
-
 #   Layout panel
 class BasicMotionsManagement(bpy.types.Panel):
 	bl_label = "Basic Motions Management"
@@ -116,7 +114,7 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 		return context.window_manager.invoke_props_dialog(self)
 	
 	def draw(self, context):
-		#pathMotion = []
+		pathMotion = []
 		Dict_Motion = {1: "ChayDan", 2 : "HoaSenNo", 3 : "LePhat", 4 : "QuaySoi", 5 : "BatQuyet", 6 : "DangHoa", 7 : "Bay", 8 : "RungTay", 9 : "DangLenCao", 10 : "PhayTay",
 		11 : "ChongSuon", 12 : "DuaThoi", 13 : "VunGon", 14 : "DangRuou", 15 : "Vay", 16 : "SoiBong", 17 : "RotRuou", 18 : "CheoDo", 19 : "RacDau", 20 : "DayThuyen",
 		21 : "XeTo3", 22 : "CuopBong", 23 : "DeTho", 24 : "PhuiTayAo", 25 : "LanTayAo", 26 : "GatLua", 27 : "TauNhac", 28 : "VuotToc", 29 : "Ganh", 30 : "XeTo5", 31 : "Nem",
@@ -127,9 +125,16 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
 		conn = create_connection(database)
 		with conn:
-			select_basic_movement_by_base(conn, Basic_Motion)
+			list_basic_movement = select_basic_movement_by_base(conn, Basic_Motion)
 
-		pathMotion = ["/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/ChanChongChanQuy.bvh", "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/HuanVH.bvh"]
+		print (len(list_basic_movement))
+		a = len(list_basic_movement)
+		print ("a = :", a)
+
+		for i in range(0, len(list_basic_movement)):
+			pathMotion.append(list_basic_movement[i][3])
+
+		#pathMotion = ["/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/ChanChongChanQuy.bvh", "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/HuanVH.bvh"]
 		print (pathMotion)
 		row = self.layout
 		for motion in pathMotion:

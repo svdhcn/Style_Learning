@@ -26,6 +26,7 @@ from bpy.types import (Panel,
 					   PropertyGroup,
 					   )
 
+from HMI_Motions import Kmeans_Clustering
 
 # ------------------------------------------------------------------------
 #    store properties in the active scene
@@ -113,6 +114,25 @@ class ClusterMotionOperator(bpy.types.Operator):
 		scene = context.scene
 		clustertool = scene.cluster_tool
 		file_path = clustertool.path
+		pathMotions = []
+
+		body = ""
+		if clustertool.Basic_Motions in self.List_Motions_Upper:
+			body = "Upper"
+		elif clustertool.Basic_Motions in self.List_Motions_Lower:
+			body = "Lower"
+
+		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
+		conn = create_connection(database)
+		with conn:
+			list_basic_movement = select_basic_movement_by_base(conn, clustertool.Basic_Motions)
+		
+		for i in range(0, len(list_basic_movement)):
+			pathMotions.append(list_basic_movement[i][3])
+
+		print ("Number clus:",clustertool.NumberOfCluster, "body: ", body, "list basic", pathMotions, "Path:", clustertool.path)
+
+		Kmeans_Clustering(clustertool.NumberOfCluster, body, pathMotions, clustertool.path)
 	
 		return {'FINISHED'}
 

@@ -1,4 +1,4 @@
-import bpy,IPython
+import bpy
 import math
 import pdb
 import os.path
@@ -14,7 +14,7 @@ from scipy import linalg as la
 from fbpca import pca
 from fbpca import diffsnorm
 # lib use to Gaussian Process model for regression
-import GPy
+#import GPy
 from scipy.interpolate import BSpline
 
 from os import listdir
@@ -23,7 +23,6 @@ from os.path import isfile, join
 from bvh import Bvh
  # lib use to HMM
 import imp
-from hmmlearn import hmm
 
 
 data_rotation_body = []
@@ -36,6 +35,15 @@ List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', '
 List_Bones_LowerBody = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 """"""""""""""""""""""""""""" Machine Learning """""""""""""""""""""""""""""""""""""""
+def Export_Bvh(file_path):
+	try:
+		if os.path.exists(file_path):
+			os.remove(file_path)		
+		bpy.context.scene.render.fps = 60  # We configure the frame rate		
+		bpy.ops.export_anim.bvh(filepath=file_path, global_scale = 1, frame_start= frame_start, frame_end= frame_end, rotate_mode='NATIVE', root_transform_only=True)
+		print("Exporting is successful !!!")
+	except:
+		print("Couldn't export file")
 
 def Kmeans_Clustering_Preview(K):
 	data = Pca_Rotation(2)
@@ -83,8 +91,10 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 			data = Get_Data_Rotation_UpperBody()
 		elif body == "Lower":
 			data = Get_Data_Rotation_LowerBody()
-		bpy.ops.object.mode_set(mode='OBJECT')
-		bpy.ops.object.delete(use_global=False)
+		#bpy.ops.object.mode_set(mode='OBJECT')
+		#bpy.ops.object.delete(use_global=False)
+		print ("Frame end:", frame_end)
+		print (data)
 	repeat = 5
 	mindiff = 0.0
 	labels = []
@@ -101,20 +111,23 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 			Centroids = centroids
 			labels,_ = vq(data,Centroids)
 	#  end repeat
-	# Export cluster in .txt file
-	file = open(pathCluster, "w+")
-	file.write(str(Centroids))
-	file.close()
 	
-	'''
 	data = [[]]
 	for label in labels:
 		data.append(Centroids[label])
 	data.remove([])
 	data = np.array(data)	
-	#smoothData = Bspline_Rotation_Data(labels, data)	
-	return data
+
 	'''
+	# Export cluster in .txt file
+	file = open(pathCluster, "w+")
+	file.write(str(data))
+	file.close()
+	#smoothData = Bspline_Rotation_Data(labels, data)	
+	'''
+	Export_Bvh(pathCluster)
+	return {'FINISHED'}
+	
 
 def Pca_Rotation(pca_components):
 	# This function to loss dimention data

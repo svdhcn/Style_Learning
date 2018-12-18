@@ -60,12 +60,9 @@ def select_basic_movement_by_base(conn, Name_Motion):
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM Basic_Motions WHERE Name_Motion=?", (Name_Motion,))
- 
+    cur.execute("SELECT * FROM Basic_Motions WHERE Name_Motion=?", (Name_Motion,)) 
     rows = cur.fetchall()
- 
-    for row in rows:
-        print(row)
+    return rows
 
 def add_new_base_pose(conn, new_base_pose):
     sql = ''' INSERT INTO Basic_Posture(Id_Posture,Name_Posture,path)
@@ -102,7 +99,7 @@ def main():
  
         print("2. Query all basic movements")
         #select_all_basics(conn)
-        print (select_basic_movement_by_base(conn, "HoaSenNo"))
+        select_basic_movement_by_base(conn, "HoaSenNo")
     
 
  
