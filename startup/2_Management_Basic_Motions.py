@@ -127,10 +127,6 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 		with conn:
 			list_basic_movement = select_basic_movement_by_base(conn, Basic_Motion)
 
-		print (len(list_basic_movement))
-		a = len(list_basic_movement)
-		print ("a = :", a)
-
 		for i in range(0, len(list_basic_movement)):
 			pathMotion.append(list_basic_movement[i][3])
 

@@ -91,7 +91,8 @@ class MySettings(PropertyGroup):
 				('XeTo5', "Tay Xe To The 5", ""),
 				('Ganh', "Ganh", ""),
 				('VuotToc', "Tay Vuot Toc", ""),
-				('GatLua', "Tay Gat Lua", ""),
+				('TauNhac', "Tau Nhac", ""),
+				('GatLua', "Tay Gat Lua", ""),				
 				('LanTayAo', "Lan Tay Ao", ""),
 				('PhuiTayAo', "Phui Tay Ao", ""),
 				('DeTho', "Tay De Tho", ""),
@@ -147,7 +148,7 @@ class UpdateMotionOperator(bpy.types.Operator):
 			Id_Posture = "T_DANGRUOU"
 		elif mytool.Basic_Motions in ["CuopBong", "DeTho", "PhuiTayAo", "LanTayAo", "GatLua"]:
 			Id_Posture = "T_CUOPBONG"
-		elif mytool.Basic_Motions in ["VuotToc", "Ganh", "XeTo5", "Nem"]:
+		elif mytool.Basic_Motions in ["TauNhac","VuotToc", "Ganh", "XeTo5", "Nem"]:
 			Id_Posture = "T_TAUNHAC"
 		elif mytool.Basic_Motions in ["ChanChuV"]:
 			Id_Posture = "C_CHUV"
