@@ -1,4 +1,4 @@
-import bpy
+import bpy, IPython
 import math
 import pdb
 import os.path
@@ -82,6 +82,8 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 	# Read all File motions in data base, 
 	# Get all data Rotation in .bvh file	
 	for pathMotion in listPathMotions:
+		bpy.ops.object.mode_set(mode='OBJECT')
+		bpy.ops.object.delete(use_global=False)
 		bpy.ops.import_anim.bvh(filepath= pathMotion, axis_forward="Y", axis_up="Z", rotate_mode="NATIVE")
 		with open(pathMotion) as f:
 			global frame_end			
@@ -111,21 +113,29 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 			Centroids = centroids
 			labels,_ = vq(data,Centroids)
 	#  end repeat
-	
+	'''
 	data = [[]]
 	for label in labels:
 		data.append(Centroids[label])
 	data.remove([])
-	data = np.array(data)	
-
+	data = np.array(data)
 	'''
+	#IPython.embed()
+
+	
 	# Export cluster in .txt file
 	file = open(pathCluster, "w+")
-	file.write(str(data))
+	file.write("Data clustering of Motion." + '\n')
+	file.write("The number of cluster is :" + str(K) + '\n')	
+
+	for centroid in Centroids:
+		for element in centroid:
+			file.write(str(element) + ' ')
+		file.write('\n')
 	file.close()
 	#smoothData = Bspline_Rotation_Data(labels, data)	
-	'''
-	Export_Bvh(pathCluster)
+	#Export_Bvh(pathCluster)
+
 	return {'FINISHED'}
 	
 
