@@ -98,6 +98,23 @@ class ClusterSettings(PropertyGroup):
 #    operators
 # ------------------------------------------------------------------------
 
+
+class UpdateUpperMotionOperator(bpy.types.Operator):
+	bl_idname = "wm.upper_motions"
+	bl_label = "Update Upper Cluster Motions"
+
+	def execute(self, context):
+		print ("update upper motions")
+		return{"FINISHED"}
+
+class UpdateLowerMotionOperator(bpy.types.Operator):
+	bl_idname = "wm.lower_motions"
+	bl_label = "Update Lower Cluster Motions"
+
+	def execute(self, context):
+		print ("update lower motions")
+		return{"FINISHED"}
+
 class ClusterMotionOperator(bpy.types.Operator):
 	bl_idname = "wm.cluster_motions"
 	bl_label = "Clustering Basic Motions"
@@ -160,16 +177,21 @@ class OBJECT_PT_cluster_panel(Panel):
 		layout.prop(clustertool, "NumberOfCluster")
 		layout.prop(clustertool, "path", text="")
 		layout.operator("wm.cluster_motions")
+		row = layout.row()
+		row.operator("wm.upper_motions")
+		row.operator("wm.lower_motions")
 
 # ------------------------------------------------------------------------
 # register and unregister
 # ------------------------------------------------------------------------
 
 def register():
+	bpy.utils.register_class(OBJECT_PT_cluster_panel)
 	bpy.utils.register_module(__name__)
 	bpy.types.Scene.cluster_tool = PointerProperty(type=ClusterSettings)
 
 def unregister():
+	bpy.utils.unregister_class(OBJECT_PT_cluster_panel)
 	bpy.utils.unregister_module(__name__)
 	del bpy.types.Scene.cluster_tool
 

@@ -80,7 +80,8 @@ def Kmeans_Clustering_Preview(K):
 
 def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 	# Read all File motions in data base, 
-	# Get all data Rotation in .bvh file	
+	# Get all data Rotation in .bvh file
+	np.random.seed(0) # To make sure that the random seeds of K-Means algorithm are consistent	
 	for pathMotion in listPathMotions:
 		bpy.ops.object.mode_set(mode='OBJECT')
 		bpy.ops.object.delete(use_global=False)
@@ -100,7 +101,7 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 	repeat = 5
 	mindiff = 0.0
 	labels = []
-	Centroids = []
+	Centroids = []	
 	# begin repeat n times with k means
 	for i in range(repeat):
 		centroids,diff = kmeans(data, K)
@@ -125,8 +126,8 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 	
 	# Export cluster in .txt file
 	file = open(pathCluster, "w+")
-	file.write("Data clustering of Motion." + '\n')
-	file.write("The number of cluster is :" + str(K) + '\n')	
+	#file.write("Data clustering of Motion." + '\n')
+	#file.write("The number of cluster is :" + str(K) + '\n')	
 
 	for centroid in Centroids:
 		for element in centroid:

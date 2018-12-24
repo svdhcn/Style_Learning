@@ -17,7 +17,7 @@ class Delete_Basic_Motion(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		row = layout.row()
-		row.alignment = 'LEFT'
+		#row.alignment = 'LEFT'
 		row.operator("wm.delete", text="Delete Motion")
 
 #   Button

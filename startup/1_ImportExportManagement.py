@@ -34,7 +34,7 @@ class BvhFileManagement(bpy.types.Panel):
 		layout = self.layout		
 		# Creat Basic motions
 		row = layout.row()
-		row.alignment = 'LEFT'
+		#row.alignment = 'LEFT'
 		row.operator("wm.import", text="Import BVH file", icon = 'IMPORT')
 		row.operator("wm.export", text="Export BVH file", icon = 'EXPORT')
 
