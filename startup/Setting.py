@@ -23,8 +23,8 @@ List_Motion_Upper = ["ChayDan", "HoaSenNo", "LePhat", "QuaySoi", "BatQuyet","Dan
 					"VuotToc", "Ganh", "XeTo5", "Nem"]
 List_Motion_Lower = ["ChanChuV", "ChanChi", "ChanTram ", "ChanDinh", "ChanDem", "ChanChongQuy", "HaiChanQuy", "NgoiMotBen", "DuoiHaiChan", "ChanBatCheo"]
 
-List_Bone_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
-List_Bone_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
+List_Bone_Upper_Body = ['Hips','Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
+List_Bone_Lower_Body = ['Hips','RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 listBones = ['Hips','Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head',
 			'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist',

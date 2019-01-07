@@ -63,6 +63,12 @@ def select_basic_movement_by_base(conn, Name_Motion, Body):
 	rows = cur.fetchall()
 	return rows
 
+def select_basic_movement_by_name(conn, Name_Motion):
+	cur = conn.cursor()
+	cur.execute("SELECT * FROM Basic_Motions WHERE Name_Motion = ?",(Name_Motion,))
+	rows = cur.fetchall()
+	return rows
+
 def select_label_motion_by_base(conn, path_Motion):
 	cur = conn.cursor()
 	cur.execute("SELECT * FROM Basic_Motions WHERE Path_Motion = ?", (path_Motion,))
@@ -92,7 +98,9 @@ def add_new_data_upper_motion(conn, new_data):
 	cur.execute(sql, new_data)
 	return cur.lastrowid
 
-def main():    
+def main():
+	return {'FINISHED'}
+	'''
 	database = Setting.path_database
 	#database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
 	#/home/Documents_Master/Style_Learning/Data_Motions/Posture/TayChayDan.bvh
@@ -127,6 +135,7 @@ def main():
 		databasic_id = add_new_data_upper_motion(conn, newDataSqllite)
 		print("Done")
 		#select_all_basics(conn) 
+	'''
 
 if __name__ == '__main__':
 	main()

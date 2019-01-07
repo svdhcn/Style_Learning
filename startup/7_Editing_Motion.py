@@ -26,6 +26,9 @@ from bpy.types import (Panel,
 					   PropertyGroup,
 					   )
 
+import Setting
+from HMI_Motions import EditMoverment
+from SQL_Motions import *
 # ------------------------------------------------------------------------
 #    store properties in the active scene
 # ------------------------------------------------------------------------
@@ -111,7 +114,23 @@ class EditingMotionOperator(bpy.types.Operator):
 	List_Bones_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 	def execute(self, context):
-		print ("This is the function to editing motions.")	
+		scene = context.scene
+		edittool = scene.editing_tool
+		divide_body = 0
+		database = Setting.path_database
+		conn = create_connection(database)
+		with conn:
+			list_basic_motion = select_basic_movement_by_name(conn, edittool.Basic_Motions)
+		path_basic_motion = list_basic_motion[0][4]
+		name_basic_motion = list_basic_motion[0][3]
+		if name_basic_motion in Setting.List_Motion_Upper:
+			divide_body = 0
+		elif name_basic_motion in Setting.List_Motion_Lower:
+			divide_body = 1
+
+		EditMoverment(path_basic_motion, divide_body, edittool.path, edittool.Start_Frame, edittool.End_Frame)
+		print("Basic Motion:", edittool.Basic_Motions,"path motions need to edit:", edittool.path, "Start_Frame:", edittool.Start_Frame, "End_Frame:",edittool.End_Frame)
+		print ("Editing Moverment done.")
 		return {'FINISHED'}
 	
 # ------------------------------------------------------------------------
