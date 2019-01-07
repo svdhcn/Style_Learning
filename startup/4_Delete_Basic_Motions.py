@@ -3,7 +3,7 @@
 #----------------------------------------------------------
 import bpy
  
-
+'''
 # Class Creat Basic Motions
 class Delete_Basic_Motion(bpy.types.Panel):
 	bl_label = "Delete Basic Motions"
@@ -47,3 +47,4 @@ def unregister():
 
 if __name__ == "__main__":
 	register()
+'''

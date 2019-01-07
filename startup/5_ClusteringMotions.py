@@ -27,7 +27,7 @@ from bpy.types import (Panel,
 					   )
 
 from HMI_Motions import Kmeans_Clustering
-
+import Setting
 # ------------------------------------------------------------------------
 #    store properties in the active scene
 # ------------------------------------------------------------------------
@@ -41,115 +41,35 @@ class ClusterSettings(PropertyGroup):
 		min = 0
 		)
 
-	path = StringProperty(
-        name="Path",
-        description="Path to Directory",
-        default="/home/",
-        maxlen=1024,
-        subtype='FILE_PATH')
-
-	Basic_Motions = EnumProperty(
-		name="Basic Motions:",
-		description="Apply Data to attribute.",
-		items=[ ('ChanBatCheo', "Hai Chan Bat Cheo", ""),
-				('DuoiHaiChan', "Hai Chan Duoi Thang", ""),
-				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
-				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
-				('ChanChongQuy', "Chan Chong Chan Quy", ""),
-				('ChanDem', "Chan Dem Got", ""),
-				('ChanDinh', "Chan Chu Dinh", ""),
-				('ChanTram', "Chan Qua Tram", ""),
-				('ChanChi', "Chan Chu Chi", ""),
-				('ChanChuV', "Chan Hinh Chu V", ""),
-				('Nem', "Tay Nem", ""),
-				('XeTo5', "Tay Xe To The 5", ""),
-				('Ganh', "Ganh", ""),
-				('VuotToc', "Tay Vuot Toc", ""),
-				('GatLua', "Tay Gat Lua", ""),
-				('LanTayAo', "Lan Tay Ao", ""),
-				('PhuiTayAo', "Phui Tay Ao", ""),
-				('DeTho', "Tay De Tho", ""),
-				('CuopBong', "Tay Cuop Bong", ""),
-				('XeTo3', "Tay Xe To The 3", ""),
-				('DayThuyen', "Tay Day Thuyen", ""),
-				('RacDau', "Tay Rac Dau", ""),
-				('CheoDo', "Tay Cheo Do", ""),
-				('RotRuou', "Tay Rot Ruou", ""),
-				('SoiBong', "Soi Bong", ""),
-				('Vay', "Tay Vay", ""),
-				('DangRuou', "Tay Dang Ruou", ""),
-				('VunGon', "Tay Vun Gon", ""),
-				('DuaThoi', "Tay Dua Thoi", ""),
-				('ChongSuon', "Tay Chong Suon", ""),
-				('PhayTay', "Phay Tay", ""),
-				('DangLenCao', "Tay Dang Len Cao", ""),
-				('RungTay', "Rung Tay", ""),
-				('Bay', "Tay Bay", ""),
-				('DangHoa', "Tay Dang Hoa", ""),
-				('BatQuyet', "Tay Bat Quyet", ""),
-				('QuaySoi', "Tay Quay Soi", ""),
-				('LePhat', "Tay Le Phat", ""),
-				('HoaSenNo', "Tay Hoa Sen No", ""),
-				('ChayDan', "Tay Chay Dan", "")
-			   ]
+	Divide_Motions = EnumProperty(
+		name="Divide Motions:",
+		description="Data motion attribute.",
+		items=[ ('Upper', "Upper Motion", ""),
+				('Lower', "Lower Motion", "")]
 		)
 
 # ------------------------------------------------------------------------
 #    operators
 # ------------------------------------------------------------------------
 
-
-class UpdateUpperMotionOperator(bpy.types.Operator):
-	bl_idname = "wm.upper_motions"
-	bl_label = "Update Upper Cluster Motions"
-
-	def execute(self, context):
-		print ("update upper motions")
-		return{"FINISHED"}
-
-class UpdateLowerMotionOperator(bpy.types.Operator):
-	bl_idname = "wm.lower_motions"
-	bl_label = "Update Lower Cluster Motions"
-
-	def execute(self, context):
-		print ("update lower motions")
-		return{"FINISHED"}
-
 class ClusterMotionOperator(bpy.types.Operator):
 	bl_idname = "wm.cluster_motions"
-	bl_label = "Clustering Basic Motions"
-
-	List_Motions_Upper = ["ChayDan", "HoaSenNo", "LePhat", "QuaySoi", "BatQuyet","DangHoa", "Bay", "RungTay", "DangLenCao", "PhayTay", "ChongSuon", "DuaThoi", "VunGon",
-							"DangRuou", "Vay", "SoiBong", "RotRuou", "CheoDo", "RacDau", "DayThuyen", "XeTo3", "CuopBong", "DeTho", "PhuiTayAo", "LanTayAo", "GatLua",
-							"VuotToc", "Ganh", "XeTo5", "Nem"]
-	List_Motions_Lower = ["ChanChuV", "ChanChi", "ChanTram ", "ChanDinh", "ChanDem", "ChanChongQuy", "HaiChanQuy", "NgoiMotBen", "DuoiHaiChan", "ChanBatCheo"]
-
-	List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
-	List_Bones_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
+	bl_label = "Clustering Basic Motions"	
 
 	def execute(self, context):
 		scene = context.scene
 		clustertool = scene.cluster_tool
-		file_path = clustertool.path
 		pathMotions = []
 
-		body = ""
-		if clustertool.Basic_Motions in self.List_Motions_Upper:
-			body = "Upper"
-		elif clustertool.Basic_Motions in self.List_Motions_Lower:
-			body = "Lower"
-
-		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
+		database = Setting.path_database
 		conn = create_connection(database)
 		with conn:
-			list_basic_movement = select_basic_movement_by_base(conn, clustertool.Basic_Motions)
-		
+			list_basic_movement = select_all_basics(conn, Setting.Divide_Body[clustertool.Divide_Motions])
+					
 		for i in range(0, len(list_basic_movement)):
-			pathMotions.append(list_basic_movement[i][3])
-
-		print ("Number clus:",clustertool.NumberOfCluster, "body: ", body, "list basic", pathMotions, "Path:", clustertool.path)
-
-		Kmeans_Clustering(clustertool.NumberOfCluster, body, pathMotions, clustertool.path)
+			pathMotions.append(list_basic_movement[i][4])
+		
+		Kmeans_Clustering(clustertool.NumberOfCluster, clustertool.Divide_Motions, pathMotions)
 	
 		return {'FINISHED'}
 
@@ -173,13 +93,13 @@ class OBJECT_PT_cluster_panel(Panel):
 		layout = self.layout
 		scene = context.scene
 		clustertool = scene.cluster_tool
-		layout.prop(clustertool, "Basic_Motions", text="")
+		layout.prop(clustertool, "Divide_Motions", text="")
 		layout.prop(clustertool, "NumberOfCluster")
-		layout.prop(clustertool, "path", text="")
+		#layout.prop(clustertool, "path", text="")
 		layout.operator("wm.cluster_motions")
-		row = layout.row()
-		row.operator("wm.upper_motions")
-		row.operator("wm.lower_motions")
+		#row = layout.row()
+		#row.operator("wm.upper_motions")
+		#row.operator("wm.lower_motions")
 
 # ------------------------------------------------------------------------
 # register and unregister

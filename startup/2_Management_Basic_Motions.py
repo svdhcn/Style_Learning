@@ -19,6 +19,7 @@ bl_info = {
 #----------------------------------------------------------
 import bpy
 from SQL_Motions import create_connection, select_basic_movement_by_base
+import Setting
 #   Layout panel
 class BasicMotionsManagement(bpy.types.Panel):
 	bl_label = "Basic Motions Management"
@@ -92,7 +93,7 @@ class BasicMotionsManagement(bpy.types.Panel):
 		subrow.operator("my.button", text="Chan Qua Tram", icon = 'POSE_DATA').number = 40
 		subrow.operator("my.button", text="Hai Chan Bat Cheo", icon = 'POSE_DATA').number = 41
 
-def UpdatedFunction(self, context):
+def UpdatedFunction(self, context):	
 	print("In update func....")
 	return
 
@@ -106,6 +107,8 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 
 	checkbox = bpy.props.BoolProperty(name = "Bool Property", default = 0, update = UpdatedFunction)
 
+	
+	
 	def execute(self, context):
 		print ("Management Basics")
 		return{'FINISHED'}
@@ -115,20 +118,27 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 	
 	def draw(self, context):
 		pathMotion = []
+
 		Dict_Motion = {1: "ChayDan", 2 : "HoaSenNo", 3 : "LePhat", 4 : "QuaySoi", 5 : "BatQuyet", 6 : "DangHoa", 7 : "Bay", 8 : "RungTay", 9 : "DangLenCao", 10 : "PhayTay",
 		11 : "ChongSuon", 12 : "DuaThoi", 13 : "VunGon", 14 : "DangRuou", 15 : "Vay", 16 : "SoiBong", 17 : "RotRuou", 18 : "CheoDo", 19 : "RacDau", 20 : "DayThuyen",
 		21 : "XeTo3", 22 : "CuopBong", 23 : "DeTho", 24 : "PhuiTayAo", 25 : "LanTayAo", 26 : "GatLua", 27 : "TauNhac", 28 : "VuotToc", 29 : "Ganh", 30 : "XeTo5", 31 : "Nem",
 		32 : "ChanChuV", 33 : "ChanChongQuy", 34 : "ChanChi", 35 : "HaiChanQuy", 36 : "ChanDinh", 37 : "NgoiMotBen", 38 : "ChanDem", 39 : "DuoiHaiChan", 40 : "ChanTram", 41: "ChanBatCheo"}
 
 		Basic_Motion = Dict_Motion[self.number]
+		
+		database = Setting.path_database
 
-		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
 		conn = create_connection(database)
 		with conn:
-			list_basic_movement = select_basic_movement_by_base(conn, Basic_Motion)
+			Body = 0
+			if Basic_Motion in Setting.List_Motion_Upper:
+				Body = 0
+			elif Basic_Motion in Setting.List_Motion_Lower:
+				Body = 1
+			list_basic_movement = select_basic_movement_by_base(conn, Basic_Motion, Body)
 
 		for i in range(0, len(list_basic_movement)):
-			pathMotion.append(list_basic_movement[i][3])
+			pathMotion.append(list_basic_movement[i][4])
 
 		#pathMotion = ["/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/ChanChongChanQuy.bvh", "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/HuanVH.bvh"]
 		print (pathMotion)

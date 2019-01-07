@@ -24,6 +24,8 @@ from bvh import Bvh
  # lib use to HMM
 import imp
 
+import Setting
+from SQL_Motions import *
 
 data_rotation_body = []
 data_rotation_foots = []
@@ -31,8 +33,8 @@ data_location_hips = []
 basic_motion = []
 frame_start = 1
 frame_end = 1
-List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
-List_Bones_LowerBody = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
+List_Bones_UpperBody = ['Hips','Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
+List_Bones_LowerBody = ['Hips','RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 """"""""""""""""""""""""""""" Machine Learning """""""""""""""""""""""""""""""""""""""
 def Export_Bvh(file_path):
@@ -78,11 +80,13 @@ def Kmeans_Clustering_Preview(K):
 	plt.plot(Centroids[:,0],Centroids[:,1],'sm',markersize=8)
 	plt.show()
 
-def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
+def Kmeans_Clustering(K, divideMotion, listPathMotions):
 	# Read all File motions in data base, 
 	# Get all data Rotation in .bvh file
+	rotationData = []
 	np.random.seed(0) # To make sure that the random seeds of K-Means algorithm are consistent	
 	for pathMotion in listPathMotions:
+		# Read all data rotation of motion from bvh file
 		bpy.ops.object.mode_set(mode='OBJECT')
 		bpy.ops.object.delete(use_global=False)
 		bpy.ops.import_anim.bvh(filepath= pathMotion, axis_forward="Y", axis_up="Z", rotate_mode="NATIVE")
@@ -90,40 +94,61 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 			global frame_end			
 			mocap = Bvh(f.read())
 			frame_end = mocap.nframes
-		if body == "Upper":
+		if divideMotion == "Upper":
 			data = Get_Data_Rotation_UpperBody()
-		elif body == "Lower":
+			rotationData.extend(data)
+		elif divideMotion == "Lower":
 			data = Get_Data_Rotation_LowerBody()
+			rotationData.extend(data)
 		#bpy.ops.object.mode_set(mode='OBJECT')
 		#bpy.ops.object.delete(use_global=False)
-		print ("Frame end:", frame_end)
-		print (data)
-	repeat = 5
-	mindiff = 0.0
-	labels = []
-	Centroids = []	
-	# begin repeat n times with k means
-	for i in range(repeat):
-		centroids,diff = kmeans(data, K)
-		if i == 0:
-			mindiff = diff
-			Centroids = centroids
-			labels,_ = vq(data,Centroids)
-		elif mindiff > diff:
-			mindiff = diff
-			Centroids = centroids
-			labels,_ = vq(data,Centroids)
-	#  end repeat
-	'''
-	data = [[]]
-	for label in labels:
-		data.append(Centroids[label])
-	data.remove([])
-	data = np.array(data)
-	'''
-	#IPython.embed()
 
-	
+		# Start Clustering
+		repeat = 5
+		mindiff = 0.0
+		labels = []
+		Centroids = []	
+		# begin repeat n times with k means
+		for i in range(repeat):
+			centroids,diff = kmeans(rotationData, K)
+			if i == 0:
+				mindiff = diff
+				Centroids = centroids
+				labels,_ = vq(rotationData,Centroids)
+			elif mindiff > diff:
+				mindiff = diff
+				Centroids = centroids
+				labels,_ = vq(rotationData,Centroids)
+		#End repeat/end Cluster
+		'''
+		data = [[]]
+		for label in labels:
+			data.append(Centroids[label])
+		data.remove([])
+		data = np.array(data)
+		'''
+		######### Write data to database #############
+		labelMotion = ''
+		database = Setting.path_database
+		conn = create_connection(database)
+		with conn:
+			list_label_movement = select_label_motion_by_base(conn, pathMotion)
+
+		for i in range(0, len(list_label_movement)):
+			labelMotion = list_label_movement[i][3]
+		for dataMotion in Centroids:
+			database = Setting.path_database
+			conn = create_connection(database)
+			with conn:			
+				newDataSqllite = (Setting.dictMotion[labelMotion],dataMotion[0],dataMotion[1],dataMotion[2],dataMotion[3],dataMotion[4],dataMotion[5],dataMotion[6],dataMotion[7],dataMotion[8],
+								dataMotion[9],dataMotion[10],dataMotion[11],dataMotion[12],dataMotion[13],dataMotion[14],dataMotion[15],dataMotion[16],dataMotion[17],
+								dataMotion[18],dataMotion[19],dataMotion[20],dataMotion[21],dataMotion[22],dataMotion[23],dataMotion[24],dataMotion[25],dataMotion[26],
+								dataMotion[27],dataMotion[28],dataMotion[29],dataMotion[30],dataMotion[31],dataMotion[32],dataMotion[33],dataMotion[34],dataMotion[35],
+								dataMotion[36],dataMotion[37],dataMotion[38],dataMotion[39],dataMotion[40],dataMotion[41],dataMotion[42],dataMotion[43],dataMotion[44])
+				databasic_id = add_new_data_upper_motion(conn, newDataSqllite)
+				#print(databasic_id)
+
+	'''
 	# Export cluster in .txt file
 	file = open(pathCluster, "w+")
 	#file.write("Data clustering of Motion." + '\n')
@@ -136,7 +161,7 @@ def Kmeans_Clustering(K, body, listPathMotions, pathCluster):
 	file.close()
 	#smoothData = Bspline_Rotation_Data(labels, data)	
 	#Export_Bvh(pathCluster)
-
+	'''
 	return {'FINISHED'}
 	
 
@@ -193,7 +218,7 @@ def Get_Basic_Motion():
 	global basic_motion
 	basic_motion = Kmeans_Clustering()
 
-def Edit_Data_Rotation_Foots():
+def EditLowerRotation():
 	# This funtion to change rotation Foots data of bone
 	#data = Kmeans_Clustering()	
 	print('Shape data rotation foots is:', data_rotation_foots.shape)
@@ -237,9 +262,9 @@ def Edit_Data_Rotation_Foots():
 			context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 			#IPython.embed()
 	bpy.ops.object.mode_set(mode='OBJECT')
-	print("Edit rotation done")	
+	print("Edit lower rotation done")	
 
-def Edit_Data_Rotation_Body():
+def EditUpperRotation():
 	# This funtion to change rotation data of bone
 	print('Shape data rotation foots is:', data_rotation_body.shape)
 	sce = bpy.context.scene
@@ -295,4 +320,4 @@ def Edit_Data_Rotation_Body():
 			context.user_preferences.edit.keyframe_new_interpolation_type = keyInterp
 		
 	bpy.ops.object.mode_set(mode='OBJECT')
-	print("Edit rotation done")
+	print("Edit upper rotation done")

@@ -22,7 +22,7 @@ from bpy.types import Operator
 
 # Class Creat Basic Motions
 class BvhFileManagement(bpy.types.Panel):
-	bl_label = "Import Export BVH file"
+	bl_label = "Import/Export BVH file"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "TOOL_PROPS"
 

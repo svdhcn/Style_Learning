@@ -43,7 +43,7 @@ class AnalysisSettings(PropertyGroup):
 #    operators
 # ------------------------------------------------------------------------
 
-class ClusterMotionOperator(bpy.types.Operator):
+class AnalysisMotionOperator(bpy.types.Operator):
 	bl_idname = "wm.analysis_motions"
 	bl_label = "Analysis Motions"
 
@@ -74,6 +74,7 @@ class OBJECT_PT_Analysis_panel(Panel):
 		layout = self.layout
 		scene = context.scene
 		analysistool = scene.analysis_tool
+		layout.label("Motion need to Analysis")
 		layout.prop(analysistool, "path", text="")
 		layout.operator("wm.analysis_motions")
 

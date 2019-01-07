@@ -25,6 +25,7 @@ from bpy.types import (Panel,
 					   Operator,
 					   PropertyGroup,
 					   )
+import Setting
 
 
 # ------------------------------------------------------------------------
@@ -171,24 +172,18 @@ class UpdateMotionOperator(bpy.types.Operator):
 		elif mytool.Basic_Motions in ["ChanBatCheo"]:
 			Id_Posture = "C_BATCHEO"
 
-		database = "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/HumanStyle.db"
+		database = Setting.path_database
 		conn = create_connection(database)
 		with conn:
-			#new_base_pose = (mytool.Posture_Basics, mytool.path)
-			#base_pose_id = add_new_base_pose(conn, new_base_pose)
-			#print(base_pose_id)
-			#print("1. Query basic movement by base id:")
-			#select_basic_movement_by_base(conn,1)
-			
-			new_basic_movement = (Id_Posture,mytool.Basic_Motions, mytool.path)
+			Body = 0
+			if mytool.Basic_Motions in Setting.List_Motion_Upper:
+				Body = 0
+			elif mytool.Basic_Motions in Setting.List_Motion_Lower:
+				Body = 1
+			new_basic_movement = (Id_Posture, Body, mytool.Basic_Motions, mytool.path)
 			basic_movement_id = add_new_basic_movement(conn, new_basic_movement)
 			print(basic_movement_id)
-			
-			#print("2. Query all basic movements")
-			#select_all_basics(conn)
-			#new_base_pose = (mytool.Basic_Motions, mytool.path)
-
-		
+					
 		return {'FINISHED'}
 
 # ------------------------------------------------------------------------
@@ -197,7 +192,7 @@ class UpdateMotionOperator(bpy.types.Operator):
 
 class OBJECT_PT_my_panel(Panel):
 	bl_idname = "OBJECT_PT_my_panel"
-	bl_label = "Update Basic Motions"
+	bl_label = "Create New Basic Motions"
 	bl_space_type = "VIEW_3D"   
 	bl_region_type = "TOOL_PROPS"    
 	bl_category = "Tools"
@@ -213,10 +208,10 @@ class OBJECT_PT_my_panel(Panel):
 		mytool = scene.my_tool
 		#layout.label("Posture Basics")
 		#layout.prop(mytool, "Posture_Basics", text="")
-		layout.label("Basic Motions")
-		layout.prop(mytool, "Basic_Motions", text="")
-		layout.label("Path")
+		layout.label("Motions")
 		layout.prop(mytool, "path", text="")
+		layout.label("Basic Motions")
+		layout.prop(mytool, "Basic_Motions", text="")		
 		layout.prop(mytool, "Start_Frame")
 		layout.prop(mytool, "End_Frame")
 		layout.operator("wm.update_motions")
