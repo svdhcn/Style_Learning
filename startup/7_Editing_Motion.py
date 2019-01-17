@@ -11,7 +11,7 @@ bl_info = {
 	"category": "Development"
 }
 
-import bpy
+import bpy, IPython
 #from SQL_Motions import add_new_base_pose, add_new_basic_movement, create_connection, select_basic_movement_by_base, select_all_basics
 import os.path
 from bpy.props import (StringProperty,
@@ -27,7 +27,7 @@ from bpy.types import (Panel,
 					   )
 
 import Setting
-from HMI_Motions import EditMoverment
+from HMI_Motions import EditMoverment, Get_Data_Rotation_BVH_File
 from SQL_Motions import *
 # ------------------------------------------------------------------------
 #    store properties in the active scene
@@ -45,8 +45,8 @@ class EditingSettings(PropertyGroup):
 	Start_Frame = IntProperty(
 		name = "Start Frame",
 		description="A integer property",
-		default = 0,
-		min = 0
+		default = 1,
+		min = 1
 		)
 	End_Frame = IntProperty(
 		name = "End Frame",
@@ -128,7 +128,9 @@ class EditingMotionOperator(bpy.types.Operator):
 		elif name_basic_motion in Setting.List_Motion_Lower:
 			divide_body = 1
 
-		EditMoverment(path_basic_motion, divide_body, edittool.path, edittool.Start_Frame, edittool.End_Frame)
+		dataRotationMoverment = Get_Data_Rotation_BVH_File(path_basic_motion, divide_body, edittool.End_Frame - edittool.Start_Frame + 1)
+		EditMoverment(dataRotationMoverment, divide_body, edittool.path, edittool.Start_Frame, edittool.End_Frame)
+		bpy.ops.object.mode_set(mode='OBJECT')
 		print("Basic Motion:", edittool.Basic_Motions,"path motions need to edit:", edittool.path, "Start_Frame:", edittool.Start_Frame, "End_Frame:",edittool.End_Frame)
 		print ("Editing Moverment done.")
 		return {'FINISHED'}

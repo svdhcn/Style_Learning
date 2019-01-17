@@ -159,7 +159,7 @@ def Pca_Rotation(pca_components):
 """"""""""""""""""""""""""""" Execute Data """""""""""""""""""""""""""""
 # This function to get all data rotation of bones
 
-def Get_Data_Rotation_BVH_File(pathMotion, divideMotion):
+def Get_Data_Rotation_BVH_File(pathMotion, divideMotion, numberFrame):
 	ROTATION_KEY_DATA = []
 	dataRotationMoverment = []
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -168,7 +168,8 @@ def Get_Data_Rotation_BVH_File(pathMotion, divideMotion):
 	with open(pathMotion) as f:
 		global frame_end
 		mocap = Bvh(f.read())
-		frame_end = mocap.nframes
+		#frame_end = mocap.nframes
+		frame_end = numberFrame
 		sce = bpy.context.scene
 		ob = bpy.context.object
 		if divideMotion == 0:
@@ -191,14 +192,18 @@ def Get_Data_Rotation_BVH_File(pathMotion, divideMotion):
 			print("Wrong data divideMotion.")
 
 		dataRotationMoverment = np.asarray(ROTATION_KEY_DATA)
+		print("Get data rotation from BVH file done.")
 	return dataRotationMoverment
 
-def EditMoverment(pathBasicMotion, body, pathMotionEdit, startFrame, endFrame):
-	dataRotationMoverment = Get_Data_Rotation_BVH_File(pathBasicMotion, body)
+def EditMoverment(dataRotationMoverment, body, pathMotionEdit, startFrame, endFrame):
+	#numberFrame = endFrame - startFrame + 1
+	#dataRotationMoverment = Get_Data_Rotation_BVH_File(pathBasicMotion, body, numberFrame)
 	bpy.ops.object.mode_set(mode='OBJECT')
 	bpy.ops.object.delete(use_global=False)
 	bpy.ops.import_anim.bvh(filepath= pathMotionEdit, axis_forward="Y", axis_up="Z", rotate_mode="NATIVE")
-	IPython.embed()
+	# move to frame startFrame
+	#bpy.ops.anim.change_frame(startFrame)
+	#IPython.embed()
 	if body == 0:
 		EditUpperRotation(dataRotationMoverment, startFrame, endFrame)
 	elif body == 1:
@@ -216,7 +221,7 @@ def EditLowerRotation(dataRotationMoverment, startFrame, endFrame):
 	bpy.ops.object.mode_set(mode='POSE')
 	#frame_end_change = dataRotationMoverment.shape[0]
 	for f in range(startFrame, endFrame):
-		frameSet = f - 1
+		frameSet = f
 		sce.frame_set(f)
 		keyFrame = context.scene.frame_current
 		keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
@@ -256,18 +261,18 @@ def EditLowerRotation(dataRotationMoverment, startFrame, endFrame):
 def EditUpperRotation(dataRotationMoverment, startFrame, endFrame):
 	# This funtion to change rotation data of bone
 	print('Shape data rotation foots is:', dataRotationMoverment.shape)
-
+	#IPython.embed()
 	sce = bpy.context.scene
 	ob = bpy.context.object	
 	bpy.ops.object.mode_set(mode='POSE')
 	frame_end_change = dataRotationMoverment.shape[0]
-	for f in range(startFrame, endFrame):
+	for f in range(0, endFrame - startFrame):
 		frameSet = f
-		sce.frame_set(f)
 		sce.frame_set(frameSet)
-		keyFrame = context.scene.frame_current
-		keyInterp = context.user_preferences.edit.keyframe_new_interpolation_type
-		context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
+		#IPython.embed()
+		keyFrame = bpy.context.scene.frame_current
+		keyInterp = bpy.context.user_preferences.edit.keyframe_new_interpolation_type
+		bpy.context.user_preferences.edit.keyframe_new_interpolation_type = "BEZIER"
 		for pbone in ob.pose.bones:
 			lastMode = pbone.rotation_mode
 			pbone.rotation_mode = "XYZ"
