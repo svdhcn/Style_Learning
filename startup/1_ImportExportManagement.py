@@ -153,6 +153,8 @@ class ImportBvhData(Operator, ImportHelper):
 
 	def execute(self, context):
 		bpy.context.scene.render.fps = 60
+		bpy.ops.object.mode_set(mode='OBJECT')
+		bpy.ops.object.delete(use_global=False)
 		return bpy.ops.import_anim.bvh(filepath= self.filepath, axis_forward=self.forward, axis_up=self.up, rotate_mode=self.rotation)
 
  

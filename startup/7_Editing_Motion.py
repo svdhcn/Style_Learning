@@ -58,16 +58,22 @@ class EditingSettings(PropertyGroup):
 	Basic_Motions = EnumProperty(
 		name="Basic Motions:",
 		description="Apply Data to attribute.",
-		items=[ ('ChanBatCheo', "Hai Chan Bat Cheo", ""),
-				('DuoiHaiChan', "Hai Chan Duoi Thang", ""),
-				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
-				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
+				items=[ ('ChanDuoiThang', "Hai Chan Duoi Thang", ""),
+				('ChanXien', "Chan Chu V - Chan ChanXien", ""),
+				('ChanKhongLuuNu', "Chan Khong Luu (Nu)", ""),
+				('ChanKhongLuuNam', "Chan Khong Luu (Nam)", ""),
+				('ChanBatCheo', "Hai Chan Bat Cheo", ""),
+				('ChanLaoSay', "Chan Lao Say", ""),
+				('ChanQuaTram', "Chan Qua Tram", ""),
+				('NgoiMotBen', "Hai Chan Ngoi Ve Mot Ben", ""),
+				('ChanNamNgang', "Chan Nam Ngang", ""),
+				('ChanNuLech', "Chan Nu Lech", ""),
+				('HaiChanQuy', "Hai Chan Cung Quy", ""),
+				('ChanDemGot', "Chan Dem Got", ""),
+				('ChanChuDinh', "Chan Chu Dinh", ""),
 				('ChanChongQuy', "Chan Chong Chan Quy", ""),
-				('ChanDem', "Chan Dem Got", ""),
-				('ChanDinh', "Chan Chu Dinh", ""),
-				('ChanTram', "Chan Qua Tram", ""),
-				('ChanChi', "Chan Chu Chi", ""),
-				('ChanChuV', "Chan Hinh Chu V", ""),
+				('ChanChuChiNu', "Chan Chu Chi (Nu)", ""),
+				('ChanChuChiNam', "Chan Chu Chi (Nam)", ""),
 				('Nem', "Tay Nem", ""),
 				('XeTo5', "Tay Xe To The 5", ""),
 				('Ganh', "Ganh", ""),
@@ -99,7 +105,7 @@ class EditingSettings(PropertyGroup):
 				('LePhat', "Tay Le Phat", ""),
 				('HoaSenNo', "Tay Hoa Sen No", ""),
 				('ChayDan', "Tay Chay Dan", "")
-			   ]
+			]
 		)
 
 # ------------------------------------------------------------------------

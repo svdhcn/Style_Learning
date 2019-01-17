@@ -76,14 +76,14 @@ def select_label_motion_by_base(conn, path_Motion):
 	return row
 
 def add_new_base_pose(conn, new_base_pose):
-	sql = ''' INSERT INTO Basic_Posture(Id_Posture,Name_Posture,path)
+	sql = ''' INSERT INTO Basic_Posture(Id_Posture,Name_Posture,Path_Motion)
 			  VALUES(?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, new_base_pose)
 	return cur.lastrowid
 
 def add_new_basic_movement(conn, new_basic_movement):
-	sql = ''' INSERT INTO Basic_Motions(Id_Posture, Body, Name_Motion, path)
+	sql = ''' INSERT INTO Basic_Motions(Id_Posture, Body, Name_Motion, Path_Motion)
 			  VALUES(?,?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, new_basic_movement)

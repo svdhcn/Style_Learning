@@ -78,16 +78,22 @@ class MySettings(PropertyGroup):
 	Basic_Motions = EnumProperty(
 		name="Basic Motions:",
 		description="Apply Data to attribute.",
-		items=[ ('ChanBatCheo', "Hai Chan Bat Cheo", ""),
-				('DuoiHaiChan', "Hai Chan Duoi Thang", ""),
-				('NgoiMotBen', "Ngoi Hai Chan Co Ve Mot Ben", ""),
-				('HaiChanQuy', "Hai Dau Goi Cung Quy", ""),
+		items=[ ('ChanDuoiThang', "Hai Chan Duoi Thang", ""),
+				('ChanXien', "Chan Chu V - Chan Xien", ""),
+				('ChanKhongLuuNu', "Chan Khong Luu (Nu)", ""),
+				('ChanKhongLuuNam', "Chan Khong Luu (Nam)", ""),
+				('ChanBatCheo', "Hai Chan Bat Cheo", ""),
+				('ChanLaoSay', "Chan Lao Say", ""),
+				('ChanQuaTram', "Chan Qua Tram", ""),
+				('NgoiMotBen', "Hai Chan Ngoi Ve Mot Ben", ""),
+				('ChanNamNgang', "Chan Nam Ngang", ""),
+				('ChanNuLech', "Chan Nu Lech", ""),
+				('HaiChanQuy', "Hai Chan Cung Quy", ""),
+				('ChanDemGot', "Chan Dem Got", ""),
+				('ChanChuDinh', "Chan Chu Dinh", ""),
 				('ChanChongQuy', "Chan Chong Chan Quy", ""),
-				('ChanDem', "Chan Dem Got", ""),
-				('ChanDinh', "Chan Chu Dinh", ""),
-				('ChanTram', "Chan Qua Tram", ""),
-				('ChanChi', "Chan Chu Chi", ""),
-				('ChanChuV', "Chan Hinh Chu V", ""),
+				('ChanChuChiNu', "Chan Chu Chi (Nu)", ""),
+				('ChanChuChiNam', "Chan Chu Chi (Nam)", ""),
 				('Nem', "Tay Nem", ""),
 				('XeTo5', "Tay Xe To The 5", ""),
 				('Ganh', "Ganh", ""),
@@ -151,26 +157,22 @@ class UpdateMotionOperator(bpy.types.Operator):
 			Id_Posture = "T_CUOPBONG"
 		elif mytool.Basic_Motions in ["TauNhac","VuotToc", "Ganh", "XeTo5", "Nem"]:
 			Id_Posture = "T_TAUNHAC"
-		elif mytool.Basic_Motions in ["ChanChuV"]:
+		elif mytool.Basic_Motions in ["ChanXien"]:
 			Id_Posture = "C_CHUV"
-		elif mytool.Basic_Motions in ["ChanChi"]:
+		elif mytool.Basic_Motions in ["ChanChuChiNam", "ChanChuChiNu"]:
 			Id_Posture = "C_CHUCHI"
-		elif mytool.Basic_Motions in ["ChanTram "]:
+		elif mytool.Basic_Motions in ["ChanTram", "ChanLaoSay"]:
 			Id_Posture = "C_QUATRAM"
-		elif mytool.Basic_Motions in ["ChanDinh"]:
+		elif mytool.Basic_Motions in ["ChanDinh", "ChanDemGot"]:
 			Id_Posture = "C_CHUDINH"
-		elif mytool.Basic_Motions in ["ChanDem"]:
-			Id_Posture = "C_DEMGOT"
-		elif mytool.Basic_Motions in ["ChanChongQuy"]:
-			Id_Posture = "C_CHONGQUY"
-		elif mytool.Basic_Motions in ["HaiChanQuy"]:
-			Id_Posture = "C_QUY"
-		elif mytool.Basic_Motions in ["NgoiMotBen"]:
-			Id_Posture = "C_COMOTBEN"
-		elif mytool.Basic_Motions in ["DuoiHaiChan"]:
-			Id_Posture = "C_DUOITHANG"
-		elif mytool.Basic_Motions in ["ChanBatCheo"]:
-			Id_Posture = "C_BATCHEO"
+		elif mytool.Basic_Motions in ["ChanKhongLuuNu", "ChanKhongLuuNam"]:
+			Id_Posture = "C_KHONGLUU"
+		elif mytool.Basic_Motions in ["ChanChongQuy", "HaiChanQuy", "NgoiMotBen", "DuoiHaiChan", "ChanBatCheo"]:
+			Id_Posture = "C_NGOI"
+		elif mytool.Basic_Motions in ["ChanNuLech"]:
+			Id_Posture = "C_NULECH"
+		elif mytool.Basic_Motions in ["ChanNamNgang"]:
+			Id_Posture = "C_NAMNGANG"
 
 		database = Setting.path_database
 		conn = create_connection(database)

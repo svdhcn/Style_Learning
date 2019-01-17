@@ -78,20 +78,25 @@ class BasicMotionsManagement(bpy.types.Panel):
 		row = layout.row()
 		col = row.column()
 		subrow = row.column()
-		subrow.operator("my.button", text="Chan Hinh Chu V", icon = 'POSE_DATA').number = 32
-		subrow.operator("my.button", text="Chan Chong Chan Quy", icon = 'POSE_DATA').number = 33
+		subrow.operator("my.button", text="Chan Chu Chi (Nam)", icon = 'POSE_DATA').number = 32
+		subrow.operator("my.button", text="Chan Chu Chi (Nu)", icon = 'POSE_DATA').number = 33
+		subrow.operator("my.button", text="Chan Chong Chan Quy", icon = 'POSE_DATA').number = 34
 		subrow = row.column(align=True)
-		subrow.operator("my.button", text="Chan Chu Chi", icon = 'POSE_DATA').number = 34
-		subrow.operator("my.button", text="Hai Dau Goi Cung Quy", icon = 'POSE_DATA').number = 35
+		subrow.operator("my.button", text="Chan Chu Dinh", icon = 'POSE_DATA').number = 35
+		subrow.operator("my.button", text="Chan Dem Got", icon = 'POSE_DATA').number = 36
+		subrow.operator("my.button", text="Hai Dau Goi Cung Quy", icon = 'POSE_DATA').number = 37
 		subrow = row.column(align=True)
-		subrow.operator("my.button", text="Chan Chu Dinh", icon = 'POSE_DATA').number = 36
-		subrow.operator("my.button", text="Hai Chan Co Mot Ben", icon = 'POSE_DATA').number = 37
+		subrow.operator("my.button", text="Chan Nu Lech", icon = 'POSE_DATA').number = 38
+		subrow.operator("my.button", text="Chan Nam Ngang", icon = 'POSE_DATA').number = 39
+		subrow.operator("my.button", text="Hai Chan Ngoi Mot Ben", icon = 'POSE_DATA').number = 40
 		subrow = row.column(align=True)
-		subrow.operator("my.button", text="Chan Dem Got", icon = 'POSE_DATA').number = 38
-		subrow.operator("my.button", text="Hai Chan Duoi Thang", icon = 'POSE_DATA').number = 39
+		subrow.operator("my.button", text="Chan Qua Tram", icon = 'POSE_DATA').number = 41
+		subrow.operator("my.button", text="Chan Lao Say", icon = 'POSE_DATA').number = 42
+		subrow.operator("my.button", text="Chan Bat Cheo", icon = 'POSE_DATA').number = 43
 		subrow = row.column(align=True)
-		subrow.operator("my.button", text="Chan Qua Tram", icon = 'POSE_DATA').number = 40
-		subrow.operator("my.button", text="Hai Chan Bat Cheo", icon = 'POSE_DATA').number = 41
+		subrow.operator("my.button", text="Chan Khong Luu (Nam)", icon = 'POSE_DATA').number = 44
+		subrow.operator("my.button", text="Chan Khong Luu (Nu)", icon = 'POSE_DATA').number = 45
+		subrow.operator("my.button", text="Chan Chu V - Xien", icon = 'POSE_DATA').number = 46
 
 def UpdatedFunction(self, context):	
 	print("In update func....")
@@ -111,20 +116,26 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 	
 	def execute(self, context):
 		print ("Management Basics")
+		bpy.ops.object.mode_set(mode='OBJECT')
+		bpy.ops.object.delete(use_global=False)
+		for pathmotion in self.pathMotion:
+			bpy.ops.import_anim.bvh(filepath= pathmotion, axis_forward="Y", axis_up="Z", rotate_mode="NATIVE")
+	
 		return{'FINISHED'}
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_props_dialog(self)
 	
 	def draw(self, context):
-		pathMotion = []
+		self.pathMotion = []
 
 		Dict_Motion = {1: "ChayDan", 2 : "HoaSenNo", 3 : "LePhat", 4 : "QuaySoi", 5 : "BatQuyet", 6 : "DangHoa", 7 : "Bay", 8 : "RungTay", 9 : "DangLenCao", 10 : "PhayTay",
 		11 : "ChongSuon", 12 : "DuaThoi", 13 : "VunGon", 14 : "DangRuou", 15 : "Vay", 16 : "SoiBong", 17 : "RotRuou", 18 : "CheoDo", 19 : "RacDau", 20 : "DayThuyen",
 		21 : "XeTo3", 22 : "CuopBong", 23 : "DeTho", 24 : "PhuiTayAo", 25 : "LanTayAo", 26 : "GatLua", 27 : "TauNhac", 28 : "VuotToc", 29 : "Ganh", 30 : "XeTo5", 31 : "Nem",
-		32 : "ChanChuV", 33 : "ChanChongQuy", 34 : "ChanChi", 35 : "HaiChanQuy", 36 : "ChanDinh", 37 : "NgoiMotBen", 38 : "ChanDem", 39 : "DuoiHaiChan", 40 : "ChanTram", 41: "ChanBatCheo"}
+		32 : "ChanChuChiNam", 33 : "ChanChuChiNu", 34 : "ChanChongQuy", 35 : "ChanChuDinh", 36 : "ChanDemGot", 37 : "HaiChanQuy", 38 : "ChanNuLech", 39 : "ChanNamNgang", 40 : "NgoiMotBen", 
+		41 : "ChanQuaTram", 42 : "ChanLaoSay", 43 : "ChanBatCheo", 44 : "ChanKhongLuuNam", 45 : "ChanKhongLuuNu", 46 : "ChanXien", 47 : "ChanDuoiThang" }
 
-		Basic_Motion = Dict_Motion[self.number]
+		Basic_Motion = Setting.Dict_Motion[self.number]
 		
 		database = Setting.path_database
 
@@ -138,12 +149,12 @@ class OBJECT_BasicMotion_Button(bpy.types.Operator):
 			list_basic_movement = select_basic_movement_by_base(conn, Basic_Motion, Body)
 
 		for i in range(0, len(list_basic_movement)):
-			pathMotion.append(list_basic_movement[i][4])
+			self.pathMotion.append(list_basic_movement[i][4])
 
 		#pathMotion = ["/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/ChanChongChanQuy.bvh", "/home/khmt/Documents/KHMT_MOTIONS/Style_Learning/Data_Motions/Posture/HuanVH.bvh"]
-		print (pathMotion)
+		print (self.pathMotion)
 		row = self.layout
-		for motion in pathMotion:
+		for motion in self.pathMotion:
 			row.prop(self, "checkbox", text = motion)
  
 #    Registration
