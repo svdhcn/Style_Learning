@@ -24,8 +24,13 @@ from bvh import Bvh
  # lib use to HMM
 import imp
 
+from sklearn.cluster import KMeans
+
 import Setting
 from SQL_Motions import *
+
+from scipy.spatial.distance import cdist
+from scipy.spatial import distance
 
 frame_start = 1
 frame_end = 1
@@ -40,75 +45,49 @@ def Export_Bvh(file_path):
 		print("Exporting is successful !!!")
 	except:
 		print("Couldn't export file")
+	return {'FINISHED'}
 
-def Kmeans_Clustering_Preview(K):
-	data = Pca_Rotation(2)
-
-	plt.plot(data[:,0], data[:,1], 'b^', markersize = 4, alpha = .8)
-	plt.axis('equal')
-	plt.plot()
-	plt.show()
-
-	repeat = 10
-	mindiff = 0.0
-	labels = []
-	Centroids = []
-	# begin repeat n times with k means
-	for i in range(repeat):
-		centroids,diff = kmeans(data, K)
-		if i == 0:
-			mindiff = diff
-			Centroids = centroids
-			print (mindiff)
-			labels,_ = vq(data,Centroids)
-		else:
-			if mindiff > diff:
-				mindiff = diff
-				Centroids = centroids
-				print ("mindiff ",mindiff)
-				print("New centroids", Centroids)				
-				labels,_ = vq(data,Centroids)
-	#  end repeat
-	print("Centroids", Centroids)
-	plt.scatter(data[:, 0], data[:, 1], c=labels, s=50, cmap='viridis');
-	plt.plot(Centroids[:,0],Centroids[:,1],'sm',markersize=8)
-	plt.show()
+def Clear_All_Data_Database():
+	database = Setting.path_database
+	conn = create_connection(database)
+	with conn:
+		delete_all_data(conn)
+	return {'FINISHED'}
 
 def Kmeans_Clustering(K, divideMotion, listPathMotions):
-	# Read all File motions in data base, 
-	# Get all data Rotation in .bvh file
 	rotationData = []
-	np.random.seed(0) # To make sure that the random seeds of K-Means algorithm are consistent	
+	Clear_All_Data_Database()
+	np.random.seed(0)
 	for pathMotion in listPathMotions:
-		# Read all data rotation of motion from bvh file
-		rotationData = Get_Data_Rotation_BVH_File(pathMotion, divideMotion)
-		#bpy.ops.object.mode_set(mode='OBJECT')
-		#bpy.ops.object.delete(use_global=False)
-
-		# Start Clustering
-		repeat = 5
-		mindiff = 0.0
 		labels = []
 		Centroids = []	
-		# begin repeat n times with k means
-		for i in range(repeat):
-			centroids,diff = kmeans(rotationData, K)
-			if i == 0:
-				mindiff = diff
-				Centroids = centroids
-				labels,_ = vq(rotationData,Centroids)
-			elif mindiff > diff:
-				mindiff = diff
-				Centroids = centroids
-				labels,_ = vq(rotationData,Centroids)
-		#End repeat/end Cluster
-		'''
-		data = [[]]
+		rotationData = Get_Data_Rotation_BVH_File(pathMotion, divideMotion)
+
+		kmeans = KMeans(n_clusters=K, random_state=0).fit(rotationData)
+		labels = kmeans.labels_
+		Centroids = kmeans.cluster_centers_
+
+		dataRotationBones = [[]]
 		for label in labels:
-			data.append(Centroids[label])
-		data.remove([])
-		data = np.array(data)
-		'''
+			dataRotationBones.append(Centroids[label])
+		dataRotationBones = np.array(dataRotationBones)
+		
+		# Export cluster in .txt file
+		head, tail = os.path.split(pathMotion)		
+		pathCluster = head + '/' + tail.replace('bvh','txt')
+		#IPython.embed()
+		nameMotion = tail.replace(".bvh", "")
+		numberTemp = Setting.Motion_Upper[nameMotion]
+		labelsTemp = labels + (numberTemp - 1)*K
+
+		file = open(pathCluster, "w+")
+		#file.write("Data clustering of Motion." + '\n')
+		#file.write("The number of cluster is :" + str(K) + '\n')	
+		for datalabel in labelsTemp:			
+			file.write(str(datalabel) + " ")
+			#file.write('\n')
+		file.close()
+
 		######### Write data to database #############
 		labelMotion = ''
 		database = Setting.path_database
@@ -130,20 +109,6 @@ def Kmeans_Clustering(K, divideMotion, listPathMotions):
 				databasic_id = add_new_data_upper_motion(conn, newDataSqllite)
 				#print(databasic_id)
 
-	'''
-	# Export cluster in .txt file
-	file = open(pathCluster, "w+")
-	#file.write("Data clustering of Motion." + '\n')
-	#file.write("The number of cluster is :" + str(K) + '\n')	
-
-	for centroid in Centroids:
-		for element in centroid:
-			file.write(str(element) + ' ')
-		file.write('\n')
-	file.close()
-	#smoothData = Bspline_Rotation_Data(labels, data)	
-	#Export_Bvh(pathCluster)
-	'''
 	return {'FINISHED'}
 
 def Pca_Rotation(pca_components):
@@ -156,10 +121,63 @@ def Pca_Rotation(pca_components):
 	print('facebook pca time: error: %E' % (err))
 	return np.dot(U,np.diag(s))
 
+def Get_All_Data_Rotation_Clustering_Database():
+	rotationDataClusterBase = []
+	database = Setting.path_database
+	conn = create_connection(database)
+	with conn:
+		rotationDataClusterBase = select_all_data_upper_movement(conn)
+		rotationDataClusterBase = np.array(rotationDataClusterBase)
+		rotationUpperDataCluster = np.delete(rotationDataClusterBase, np.s_[:1],1)
+	return rotationUpperDataCluster
+
+def Caculate_distance_clustering(pathMotion):
+	divideMotion = 0
+	labelsDataBone = []
+	rotationData = Get_Data_Rotation_BVH_File(pathMotion, divideMotion)
+	rotationUpperDataCluster = Get_All_Data_Rotation_Clustering_Database()
+	for PerformancesData in rotationData:
+		distanceArray = []
+		for baseData in rotationUpperDataCluster:
+			distance = np.linalg.norm(baseData-PerformancesData)
+			distanceArray.append(distance)
+		distanceArray = np.asarray(distanceArray)
+		labelsDataBone.append(distanceArray.argmin() + 1)
+	labelsDataBone = np.asarray(labelsDataBone)
+
+	pathPerformances = pathMotion.replace('.bvh','.txt')
+	# write labels cluster performaces dance to .txt file
+	file = open(pathPerformances, "w+")
+	#file.write("Data clustering of Motion." + '\n')
+	#file.write("The number of cluster is :" + str(K) + '\n')	
+	for datalabel in labelsDataBone:		
+		file.write(str(datalabel) + " ")
+		#file.write('\n')
+	file.close()
+
+	return {'FINISHED'}
+
+def Caculate_distance_clustering_basis_motion(pathMotion):
+	divideMotion = 0
+	labelsBoneBasicData = []
+	rotationBoneBasicData = Get_Data_Rotation_BVH_File(pathMotion, divideMotion)
+	rotationUpperDataCluster = Get_All_Data_Rotation_Clustering_Database()
+	for PerformancesData in rotationBoneBasicData:
+		distanceArray = []
+		for baseData in rotationUpperDataCluster:
+			distance = np.linalg.norm(baseData-PerformancesData)
+			distanceArray.append(distance)
+		distanceArray = np.asarray(distanceArray)
+		labelsBoneBasicData.append(distanceArray.argmin() + 1)
+	labelsBoneBasicData = np.asarray(labelsBoneBasicData)
+	IPython.embed()
+	return {'FINISHED'}
+
+
 """"""""""""""""""""""""""""" Execute Data """""""""""""""""""""""""""""
 # This function to get all data rotation of bones
 
-def Get_Data_Rotation_BVH_File(pathMotion, divideMotion, numberFrame):
+def Get_Data_Rotation_BVH_File(pathMotion, divideMotion):
 	ROTATION_KEY_DATA = []
 	dataRotationMoverment = []
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -168,8 +186,8 @@ def Get_Data_Rotation_BVH_File(pathMotion, divideMotion, numberFrame):
 	with open(pathMotion) as f:
 		global frame_end
 		mocap = Bvh(f.read())
-		#frame_end = mocap.nframes
-		frame_end = numberFrame
+		frame_end = mocap.nframes
+		#frame_end = numberFrame
 		sce = bpy.context.scene
 		ob = bpy.context.object
 		if divideMotion == 0:
@@ -316,3 +334,4 @@ def EditUpperRotation(dataRotationMoverment, startFrame, endFrame):
 		
 	bpy.ops.object.mode_set(mode='OBJECT')
 	print("Edit upper rotation done")
+

@@ -28,6 +28,7 @@ from bpy.types import (Panel,
 
 from HMI_Motions import Kmeans_Clustering
 import Setting
+import IPython
 # ------------------------------------------------------------------------
 #    store properties in the active scene
 # ------------------------------------------------------------------------
@@ -37,7 +38,7 @@ class ClusterSettings(PropertyGroup):
 	NumberOfCluster = IntProperty(
 		name = "Number Of Clusters",
 		description="A integer property",
-		default = 50,
+		default = 100,
 		min = 0
 		)
 
@@ -68,8 +69,11 @@ class ClusterMotionOperator(bpy.types.Operator):
 					
 		for i in range(0, len(list_basic_movement)):
 			pathMotions.append(list_basic_movement[i][4])
-		
-		Kmeans_Clustering(clustertool.NumberOfCluster, clustertool.Divide_Motions, pathMotions)
+
+		Divide_Motion = Setting.Divide_Body[clustertool.Divide_Motions]
+		#IPython.embed()
+				
+		Kmeans_Clustering(clustertool.NumberOfCluster, Divide_Motion, pathMotions)
 	
 		return {'FINISHED'}
 

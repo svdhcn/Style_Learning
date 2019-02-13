@@ -25,7 +25,7 @@ from bpy.types import (Panel,
 					   Operator,
 					   PropertyGroup,
 					   )
-
+from HMI_Motions import Caculate_distance_clustering
 # ------------------------------------------------------------------------
 #    store properties in the active scene
 # ------------------------------------------------------------------------
@@ -35,7 +35,7 @@ class AnalysisSettings(PropertyGroup):
 	path = StringProperty(
         name="Path",
         description="Path to Directory",
-        default="/home/",
+        default="/home/huanvh/Documents/Style_Learning/",
         maxlen=1024,
         subtype='FILE_PATH')
 
@@ -43,15 +43,34 @@ class AnalysisSettings(PropertyGroup):
 #    operators
 # ------------------------------------------------------------------------
 
-class AnalysisMotionOperator(bpy.types.Operator):
-	bl_idname = "wm.analysis_motions"
-	bl_label = "Analysis Motions"
+class AnalysisUpperMotionOperator(bpy.types.Operator):
+	bl_idname = "wm.analysis_upper_motions"
+	bl_label = "Analysis Upper Motions"
 
 	List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
 	List_Bones_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
 
 	def execute(self, context):
-		print ("This is the function to analysis motions.")	
+		scene = context.scene
+		analysistool = scene.analysis_tool
+		Caculate_distance_clustering(analysistool.path)
+		#rotationUpper = Get_All_Data_Rotation_Clustering_Database()
+		print ("This is the function to analysis upper motions.")	
+		return {'FINISHED'}
+
+class AnalysisLowerMotionOperator(bpy.types.Operator):
+	bl_idname = "wm.analysis_lower_motions"
+	bl_label = "Analysis Lower Motions"
+
+	List_Bones_UpperBody = ['Chest', 'Chest2', 'Chest3', 'Chest4', 'Neck', 'Head', 'RightCollar', 'RightShoulder', 'RightElbow', 'RightWrist', 'LeftCollar', 'LeftShoulder', 'LeftElbow', 'LeftWrist']
+	List_Bones_Lower_Body = ['RightHip', 'RightKnee', 'RightAnkle', 'RightToe', 'LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftToe']
+
+	def execute(self, context):
+		scene = context.scene
+		analysistool = scene.analysis_tool
+		#Caculate_distance_clustering(analysistool.path)
+		#rotationUpper = Get_All_Data_Rotation_Clustering_Database()
+		print ("This is the function to analysis lower motions.")	
 		return {'FINISHED'}
 	
 # ------------------------------------------------------------------------
@@ -60,7 +79,7 @@ class AnalysisMotionOperator(bpy.types.Operator):
 
 class OBJECT_PT_Analysis_panel(Panel):
 	bl_idname = "OBJECT_PT_analysis_panel"
-	bl_label = "Analysis Motion"
+	bl_label = "Analysis Upper Motion"
 	bl_space_type = "VIEW_3D"   
 	bl_region_type = "TOOL_PROPS"    
 	bl_category = "Tools"
@@ -76,7 +95,8 @@ class OBJECT_PT_Analysis_panel(Panel):
 		analysistool = scene.analysis_tool
 		layout.label("Motion need to Analysis")
 		layout.prop(analysistool, "path", text="")
-		layout.operator("wm.analysis_motions")
+		layout.operator("wm.analysis_upper_motions")
+		layout.operator("wm.analysis_lower_motions")
 
 # ------------------------------------------------------------------------
 # register and unregister

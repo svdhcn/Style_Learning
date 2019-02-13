@@ -120,7 +120,7 @@ class MySettings(PropertyGroup):
 				('RungTay', "Rung Tay", ""),
 				('Bay', "Tay Bay", ""),
 				('DangHoa', "Tay Dang Hoa", ""),
-				('BatQuyet', "Tay Bat Quyet", ""),
+				#('BatQuyet', "Tay Bat Quyet", ""),
 				('QuaySoi', "Tay Quay Soi", ""),
 				('LePhat', "Tay Le Phat", ""),
 				('HoaSenNo', "Tay Hoa Sen No", ""),

@@ -51,6 +51,11 @@ def select_all_basics(conn, Body):
 		#print(row)
 	return rows
 
+def delete_all_data(conn):
+	cur = conn.cursor()
+	cur.execute("DELETE FROM Data_Uppper_Motion")
+	return {'FINISHED'}
+
 def select_basic_movement_by_base(conn, Name_Motion, Body):
 	"""
 	Query basic movement by base movement id
@@ -60,6 +65,18 @@ def select_basic_movement_by_base(conn, Name_Motion, Body):
 	"""
 	cur = conn.cursor()
 	cur.execute("SELECT * FROM Basic_Motions WHERE Body = ? AND Name_Motion=?", (Body,Name_Motion,))	
+	rows = cur.fetchall()
+	return rows
+
+def select_all_data_upper_movement(conn):
+	cur = conn.cursor()
+	cur.execute("SELECT *FROM Data_Uppper_Motion")
+	rows = cur.fetchall()
+	return rows
+
+def select_all_data_lower_movement(conn):
+	cur = conn.cursor()
+	cur.execute("SELECT *FROM Data_Lower_Motion")
 	rows = cur.fetchall()
 	return rows
 
